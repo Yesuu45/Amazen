@@ -1,5 +1,11 @@
 package co.edu.uniquindio.poo.amazen.Model;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+
 public class Producto implements Cloneable{
     private String id;
     private String nombre;
@@ -19,21 +25,6 @@ public class Producto implements Cloneable{
         } catch (CloneNotSupportedException e) {
             return null;
         }
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String nuevoId) {
-        this.id = nuevoId;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-    public double getPrecio() {
-        return precio;
     }
     public boolean isDisponible() {
         return disponible;

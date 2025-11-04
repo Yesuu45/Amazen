@@ -1,78 +1,132 @@
 package co.edu.uniquindio.poo.amazen.ViewController;
 
-import co.edu.uniquindio.poo.amazen.App;
+import co.edu.uniquindio.poo.amazen.Model.Strategy.EstrategiaVista;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
+/**
+ * Controlador principal de la vista Amazen.
+ * Administra la navegación entre vistas (Catálogo, Carrito, Historial, Estado)
+ * y aplica el patrón Strategy para modificar dinámicamente la interfaz según
+ * el tipo de usuario (por ejemplo, Cliente, Administrador, Invitado, etc.).
+ */
 public class AmazenViewController {
-    @FXML
-    private Button botonCatalogo;
+
+    // ============================================================
+    // ELEMENTOS DE LA INTERFAZ
+    // ============================================================
 
     @FXML
-    private Button botonCarrito;
+    public Button botonCatalogo;
 
     @FXML
-    private Button botonHistorial;
+    public Button botonCarrito;
 
     @FXML
-    private Button botonEstado;
+    public Button botonHistorial;
+
+    @FXML
+    public Button botonEstado;
+
+    @FXML
+    private Label tituloLabel;
+
+    // ============================================================
+    // ATRIBUTOS DE CONTROL
+    // ============================================================
+
+    /**
+     * Estrategia que define el comportamiento visual según el tipo de usuario.
+     * Por ejemplo: EstrategiaVistaCliente, EstrategiaVistaAdministrador, etc.
+     */
+    private EstrategiaVista estrategiaVista;
+
+    // ============================================================
+    // MÉTODOS DE CONFIGURACIÓN DE ESTRATEGIA
+    // ============================================================
+
+    /**
+     * Establece la estrategia de vista (se puede definir desde el login
+     * o desde otro controlador según el rol del usuario).
+     *
+     * @param estrategiaVista implementación concreta de EstrategiaVista
+     */
+    public void setEstrategiaVista(EstrategiaVista estrategiaVista) {
+        this.estrategiaVista = estrategiaVista;
+        if (this.estrategiaVista != null) {
+            this.estrategiaVista.configurarVista(this);
+        }
+    }
+
+    /**
+     * Permite actualizar dinámicamente el título del encabezado.
+     *
+     * @param titulo texto a mostrar en la etiqueta superior
+     */
+    public void actualizarTitulo(String titulo) {
+        if (tituloLabel != null) {
+            tituloLabel.setText(titulo);
+        }
+    }
+
+    // ============================================================
+    // MÉTODOS DE NAVEGACIÓN ENTRE ESCENAS
+    // ============================================================
 
     @FXML
     private void irAlCatalogo() {
-        try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(App.class.getResource("catalogo.fxml"));
-            AnchorPane root = loader.load();
-            Stage stage = (Stage) botonCatalogo.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        cambiarEscena("/co/edu/uniquindio/poo/amazen/catalogo.fxml", botonCatalogo);
     }
 
     @FXML
     private void irAlCarrito() {
-        try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(App.class.getResource("carrito.fxml"));
-            AnchorPane root = loader.load();
-            Stage stage = (Stage) botonCarrito.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        cambiarEscena("/co/edu/uniquindio/poo/amazen/carrito.fxml", botonCarrito);
     }
 
     @FXML
     private void irAlHistorial() {
-        try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(App.class.getResource("historial.fxml"));
-            AnchorPane root = loader.load();
-            Stage stage = (Stage) botonHistorial.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        cambiarEscena("/co/edu/uniquindio/poo/amazen/historial.fxml", botonHistorial);
     }
 
     @FXML
     private void irAlEstado() {
+        cambiarEscena("/co/edu/uniquindio/poo/amazen/estado.fxml", botonEstado);
+    }
+
+    // ============================================================
+    // MÉTODOS AUXILIARES
+    // ============================================================
+
+    /**
+     * Cambia la escena actual a otra vista FXML.
+     *
+     * @param rutaFXML ruta completa del archivo FXML
+     * @param boton    referencia a un botón de la vista actual, usada para obtener la ventana
+     */
+    private void cambiarEscena(String rutaFXML, Button boton) {
         try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(App.class.getResource("estado.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(rutaFXML));
             AnchorPane root = loader.load();
-            Stage stage = (Stage) botonEstado.getScene().getWindow();
-            stage.setScene(new Scene(root));
+
+            // Reaplicar la estrategia si existe
+            Object controller = loader.getController();
+            if (controller instanceof AmazenViewController && estrategiaVista != null) {
+                ((AmazenViewController) controller).setEstrategiaVista(estrategiaVista);
+            }
+
+            // Cambiar la escena
+            Stage stage = (Stage) boton.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
             stage.show();
+
         } catch (Exception e) {
+            System.err.println("❌ Error al cargar la vista: " + rutaFXML);
             e.printStackTrace();
         }
     }

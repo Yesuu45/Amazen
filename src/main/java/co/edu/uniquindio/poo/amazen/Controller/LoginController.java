@@ -15,12 +15,9 @@ public class LoginController {
     }
 
     /**
-     * Intenta iniciar sesión con documento y contraseña.
      */
     public boolean iniciarSesion(String documento, String contrasena) {
-        Persona persona = amazen.buscarPersonaPorDocumento(documento);
 
-        if (persona != null && contrasena.equals(persona.getContrasena())) {
             sesionUsuario.iniciarSesion(persona);
             System.out.println("✅ Sesión iniciada correctamente para: " + persona.getNombre());
             return true;

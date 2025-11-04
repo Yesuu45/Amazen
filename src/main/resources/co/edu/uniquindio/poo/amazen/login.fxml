@@ -31,9 +31,7 @@
             <children>
 
                 <!-- Logo o nombre de la empresa -->
-                <Text style="-fx-font-size: 28px; -fx-font-family: 'Segoe UI Semibold'; -fx-fill: #0078D7;" text="Amazen" />
 
-                <Text style="-fx-font-size: 14px; -fx-fill: #6c757d;" text="Inicia sesión en tu cuenta" />
 
                 <!-- Campos de texto -->
                 <VBox prefWidth="300.0" spacing="10">
@@ -47,15 +45,11 @@
                     </children>
                 </VBox>
 
-                <!-- Botón principal -->
                 <Button fx:id="buttonIngresar"
                         onAction="#buttonIngresar"
-                        onMouseEntered="#hoverButton"
-                        onMouseExited="#exitHover"
                         prefHeight="35.0"
                         prefWidth="200.0"
                         style="-fx-background-color: #0078D7; -fx-text-fill: white;
-                               -fx-background-radius: 10; -fx-font-weight: bold;"
                         text="Iniciar Sesión" />
 
                 <!-- Enlace de registro -->

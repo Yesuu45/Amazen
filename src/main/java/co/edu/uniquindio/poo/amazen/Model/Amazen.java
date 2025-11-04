@@ -9,14 +9,13 @@ import java.util.List;
 
 @Getter
 @Setter
-public class Amazen {
+public class  Amazen {
 
     private final Inventario inventario;
     private final HistorialPedido historialPedido;
     private final TiendaSession tiendaSession;
     private final List<Persona> listaPersonas;
 
-    // Singleton (opcional)
     private static Amazen instancia;
 
     private Amazen() {
@@ -44,13 +43,9 @@ public class Amazen {
         return null;
     }
 
-    public void registrarPersona(Persona persona) {
         listaPersonas.add(persona);
     }
 
     private void cargarDatosIniciales() {
-        // Aquí podrías registrar datos de prueba
-        // listaPersonas.add(new Administrador("Carlos", "admin123", "carlos@amaZen.com", "1001"));
-        // listaPersonas.add(new Usuario("Maria", "maria123", "maria@correo.com", "1002"));
     }
 }

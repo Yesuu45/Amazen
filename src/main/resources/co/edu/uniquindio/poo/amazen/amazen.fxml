@@ -5,35 +5,53 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.poo.amazen.ViewController.AmazenViewController"
-            prefHeight="500" prefWidth="700" style="-fx-background-color: linear-gradient(to bottom right, #f2f2f2, #d9e4f5);">
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="co.edu.uniquindio.poo.amazen.ViewController.AmazenViewController"
+            prefHeight="520" prefWidth="720"
+            style="-fx-background-color: linear-gradient(to bottom right, #f2f2f2, #d9e4f5);">
 
     <children>
-        <!-- Contenedor principal centrado -->
-        <VBox layoutX="150" layoutY="50" spacing="30" alignment="CENTER" prefWidth="400" prefHeight="400">
 
-            <!-- Título -->
-            <Label text="Bienvenido a MercadoLibre" style="-fx-font-weight: bold; -fx-font-size: 28px; -fx-text-fill: #2a2a2a;">
+        <!-- Contenedor principal -->
+        <VBox layoutX="160" layoutY="50" spacing="30" alignment="CENTER" prefWidth="400" prefHeight="420">
+
+            <!-- ===================================================== -->
+            <!-- TÍTULO DINÁMICO -->
+            <!-- ===================================================== -->
+            <Label fx:id="tituloLabel"
+                   text="Bienvenido a MercadoLibre"
+                   style="-fx-font-weight: bold; -fx-text-fill: #2a2a2a;"
+                   alignment="CENTER">
                 <font>
                     <Font name="Arial Bold" size="28"/>
                 </font>
             </Label>
 
-            <!-- Botones -->
+            <!-- ===================================================== -->
+            <!-- BOTONES PRINCIPALES -->
+            <!-- ===================================================== -->
             <VBox spacing="20" alignment="CENTER">
                 <Button fx:id="botonCatalogo" text="Ir al Catálogo" onAction="#irAlCatalogo"
-                        style="-fx-background-color: #ffcc00; -fx-text-fill: #2a2a2a; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10;"
-                        prefWidth="220" prefHeight="40"/>
+                        style="-fx-background-color: #ffcc00; -fx-text-fill: #2a2a2a;
+                               -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10;"
+                        prefWidth="220" prefHeight="45"/>
+
                 <Button fx:id="botonCarrito" text="Ir al Carrito" onAction="#irAlCarrito"
-                        style="-fx-background-color: #00aaff; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10;"
-                        prefWidth="220" prefHeight="40"/>
+                        style="-fx-background-color: #00aaff; -fx-text-fill: white;
+                               -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10;"
+                        prefWidth="220" prefHeight="45"/>
+
                 <Button fx:id="botonHistorial" text="Ver Historial" onAction="#irAlHistorial"
-                        style="-fx-background-color: #00cc66; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10;"
-                        prefWidth="220" prefHeight="40"/>
+                        style="-fx-background-color: #00cc66; -fx-text-fill: white;
+                               -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10;"
+                        prefWidth="220" prefHeight="45"/>
+
                 <Button fx:id="botonEstado" text="Ver Estado" onAction="#irAlEstado"
-                        style="-fx-background-color: #ff6666; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10;"
-                        prefWidth="220" prefHeight="40"/>
+                        style="-fx-background-color: #ff6666; -fx-text-fill: white;
+                               -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10;"
+                        prefWidth="220" prefHeight="45"/>
             </VBox>
+
         </VBox>
     </children>
 </AnchorPane>
