@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.poo.amazen.ViewController.CatalogoViewController"
+            prefHeight="534.0" prefWidth="698.0"
+            style="-fx-background-color: linear-gradient(to bottom right, #f9f9f9, #e6f0ff);">
+
+    <children>
+        <VBox layoutX="20" layoutY="14" spacing="15" prefWidth="660">
+
+            <!-- Título y botón volver -->
+            <HBox spacing="20" alignment="CENTER_LEFT">
+                <Button fx:id="botonVolver" text="← Volver" onAction="#onVolver"
+                        style="-fx-background-color: #8888ff; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"/>
+                <Label text="Catálogo de Productos" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2a2a2a;" />
+            </HBox>
+
+            <!-- Filtro y acciones -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="campoBusqueda" promptText="Buscar por nombre" prefWidth="240"/>
+                <Button fx:id="botonBuscar" text="Buscar" onAction="#buscarProducto"
+                        style="-fx-background-color: #00aaff; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"/>
+
+                <Label text="Cantidad:" />
+                <TextField fx:id="campoCantidad" prefWidth="60" />
+                <Button fx:id="botonAgregar" text="Agregar al Carrito" onAction="#agregarAlCarrito"
+                        style="-fx-background-color: #00cc66; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"/>
+            </HBox>
+
+            <!-- Tabla de productos -->
+            <TableView fx:id="tablaProductos" prefHeight="360" prefWidth="660"
+                       style="-fx-border-color: #cccccc; -fx-border-radius: 8; -fx-background-radius: 8;">
+                <columns>
+                    <TableColumn fx:id="columnaNombre" text="Nombre" prefWidth="420"/>
+                    <TableColumn fx:id="columnaPrecio" text="Precio" prefWidth="220"/>
+                </columns>
+            </TableView>
+
+            <!-- Botón inferior -->
+            <HBox alignment="CENTER_RIGHT">
+                <Button fx:id="botonClonar" text="Clonar Producto" onAction="#clonarProducto"
+                        style="-fx-background-color: #ff6666; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"
+                        prefWidth="150"/>
+            </HBox>
+
+        </VBox>
+    </children>
+</AnchorPane>

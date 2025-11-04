@@ -1,0 +1,53 @@
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.Label?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="co.edu.uniquindio.poo.amazen.ViewController.EstadoViewController"
+            prefWidth="714" prefHeight="506"
+            style="-fx-background-color: linear-gradient(to bottom right, #f9f9f9, #e6f0ff);">
+
+    <children>
+        <VBox layoutX="20" layoutY="14" spacing="15" prefWidth="674">
+
+            <!-- Encabezado -->
+            <HBox spacing="20" alignment="CENTER_LEFT">
+                <Button fx:id="botonVolver" text="← Volver" onAction="#onVolver"
+                        style="-fx-background-color: #8888ff; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;" />
+                <Label text="Estado de Pedidos"
+                       style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2a2a2a;" />
+            </HBox>
+
+            <!-- Tabla de pedidos -->
+            <TableView fx:id="tablaPedidos" prefHeight="360" prefWidth="674"
+                       style="-fx-border-color: #cccccc; -fx-border-radius: 8; -fx-background-radius: 8;">
+                <columns>
+                    <TableColumn fx:id="columnaId" text="ID Pedido" prefWidth="200"/>
+                    <TableColumn fx:id="columnaEstado" text="Estado" prefWidth="200"/>
+                    <TableColumn fx:id="columnaTotal" text="Total" prefWidth="274"/>
+                </columns>
+            </TableView>
+
+            <!-- Botones de acción -->
+            <HBox spacing="15" alignment="CENTER">
+                <Button fx:id="botonVerificarPago" text="Verificar Pago" onAction="#verificarPago"
+                        style="-fx-background-color: #28A745; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"
+                        prefWidth="120" prefHeight="30"/>
+                <Button fx:id="botonEmpaquetado" text="Empaquetado" onAction="#empaquetado"
+                        style="-fx-background-color: #FFA500; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"
+                        prefWidth="120" prefHeight="30"/>
+                <Button fx:id="botonEnviado" text="Enviado" onAction="#enviado"
+                        style="-fx-background-color: #0B57D0; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"
+                        prefWidth="120" prefHeight="30"/>
+                <Button fx:id="botonEntregado" text="Entregado" onAction="#entregado"
+                        style="-fx-background-color: #6C757D; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"
+                        prefWidth="120" prefHeight="30"/>
+            </HBox>
+
+        </VBox>
+    </children>
+</AnchorPane>

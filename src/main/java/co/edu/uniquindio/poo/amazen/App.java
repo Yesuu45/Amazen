@@ -1,0 +1,21 @@
+package co.edu.uniquindio.poo.amazen;
+
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+public class App extends Application {
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        FXMLLoader loader = new FXMLLoader(App.class.getResource("amazen.fxml"));
+        Scene scene = new Scene(loader.load(), 700, 500);
+        primaryStage.setTitle("Amazen");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}

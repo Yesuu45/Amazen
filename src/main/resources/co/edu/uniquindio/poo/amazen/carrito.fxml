@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="co.edu.uniquindio.poo.amazen.ViewController.CarritoViewController"
+            prefHeight="500" prefWidth="700"
+            style="-fx-background-color: linear-gradient(to bottom right, #f9f9f9, #e6f0ff);">
+
+    <children>
+        <VBox layoutX="20" layoutY="14" spacing="15" prefWidth="660">
+
+            <!-- Título y botón volver -->
+            <HBox spacing="20" alignment="CENTER_LEFT">
+                <Button fx:id="botonVolver" text="← Volver" onAction="#onVolver"
+                        style="-fx-background-color: #8888ff; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;" />
+                <Label text="Carrito de Compras"
+                       style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2a2a2a;" />
+            </HBox>
+
+            <!-- Tabla del carrito -->
+            <TableView fx:id="tablaCarrito" prefHeight="320" prefWidth="660"
+                       style="-fx-border-color: #cccccc; -fx-border-radius: 8; -fx-background-radius: 8;">
+                <columns>
+                    <TableColumn fx:id="columnaProducto" text="Producto" prefWidth="320"/>
+                    <TableColumn fx:id="columnaCantidad" text="Cantidad" prefWidth="120"/>
+                    <TableColumn fx:id="columnaSubtotal" text="Subtotal" prefWidth="220"/>
+                </columns>
+            </TableView>
+
+            <!-- Acciones sobre productos -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Nueva Cantidad:" />
+                <TextField fx:id="campoNuevaCantidad" prefWidth="70"/>
+                <Button fx:id="botonActualizar" text="Actualizar Cantidad" onAction="#actualizarCantidad"
+                        style="-fx-background-color: #00cc66; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;" />
+                <Button fx:id="botonEliminar" text="Eliminar Producto" onAction="#eliminarProducto"
+                        style="-fx-background-color: #ff6666; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;" />
+            </HBox>
+
+            <!-- Total y botón realizar pedido -->
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Label fx:id="totalLabel" text="Total: $0.00"
+                       style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2a2a2a;" />
+                <Button fx:id="botonRealizarPedido" text="Realizar Pedido" onAction="#realizarPedido"
+                        style="-fx-background-color: #0B57D0; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"
+                        prefWidth="140" prefHeight="30" />
+            </HBox>
+
+        </VBox>
+    </children>
+</AnchorPane>
