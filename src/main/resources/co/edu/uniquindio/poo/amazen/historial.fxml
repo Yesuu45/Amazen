@@ -6,37 +6,49 @@
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="co.edu.uniquindio.poo.amazen.ViewController.HistorialViewController"
-            prefWidth="700" prefHeight="500"
-            style="-fx-background-color: linear-gradient(to bottom right, #f9f9f9, #e6f0ff);">
+            prefWidth="800" prefHeight="520"
+            style="-fx-background-color: linear-gradient(to bottom right, #f0f4ff, #e6ecff);">
 
     <children>
-        <VBox layoutX="20" layoutY="14" spacing="15" prefWidth="660">
 
-            <!-- Título y botón volver -->
+        <VBox spacing="20" alignment="TOP_CENTER" prefWidth="760" prefHeight="500"
+              layoutX="20" layoutY="10" style="-fx-padding: 20;">
+
+            <!-- ===================================================== -->
+            <!-- ENCABEZADO -->
+            <!-- ===================================================== -->
             <HBox spacing="20" alignment="CENTER_LEFT">
                 <Button fx:id="botonVolver" text="← Volver" onAction="#onVolver"
-                        style="-fx-background-color: #8888ff; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;" />
-                <Label text="Historial de Pedidos"
-                       style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2a2a2a;" />
+                        prefHeight="35" prefWidth="100"
+                        style="-fx-background-color: #4A6CF7; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10;" />
+                <Label fx:id="tituloLabel" text="Historial de Pedidos"
+                       style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1E1E1E;" />
             </HBox>
 
-            <!-- Tabla de pedidos -->
-            <TableView fx:id="tablaPedidos" prefHeight="360" prefWidth="660"
-                       style="-fx-border-color: #cccccc; -fx-border-radius: 8; -fx-background-radius: 8;">
+            <!-- ===================================================== -->
+            <!-- TABLA DE PEDIDOS -->
+            <!-- ===================================================== -->
+            <TableView fx:id="tablaPedidos"
+                       prefHeight="360" prefWidth="740"
+                       style="-fx-border-color: #d0d7ff; -fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: white;">
                 <columns>
                     <TableColumn fx:id="columnaId" text="ID Pedido" prefWidth="200"/>
                     <TableColumn fx:id="columnaEstado" text="Estado" prefWidth="200"/>
-                    <TableColumn fx:id="columnaTotal" text="Total" prefWidth="260"/>
+                    <TableColumn fx:id="columnaTotal" text="Total" prefWidth="320"/>
                 </columns>
             </TableView>
 
-            <!-- Botón exportar -->
-            <HBox alignment="CENTER_RIGHT">
-                <Button fx:id="botonExportar" text="Exportar Pedido Seleccionado" onAction="#exportarPedido"
-                        style="-fx-background-color: #0B57D0; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"
-                        prefWidth="200" prefHeight="30" />
+            <!-- ===================================================== -->
+            <!-- BOTONES INFERIORES -->
+            <!-- ===================================================== -->
+            <HBox spacing="15" alignment="CENTER_RIGHT">
+                <Button fx:id="botonExportar"
+                        text="Exportar Pedido Seleccionado"
+                        onAction="#exportarPedido"
+                        prefWidth="250" prefHeight="35"
+                        style="-fx-background-color: #0B57D0; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10;" />
             </HBox>
-
         </VBox>
+
     </children>
 </AnchorPane>
