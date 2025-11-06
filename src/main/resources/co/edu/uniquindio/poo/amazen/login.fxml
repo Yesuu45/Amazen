@@ -31,7 +31,7 @@
             <children>
 
                 <!-- Logo o nombre de la empresa -->
-
+                <Label text="Amazen" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
 
                 <!-- Campos de texto -->
                 <VBox prefWidth="300.0" spacing="10">
@@ -45,12 +45,13 @@
                     </children>
                 </VBox>
 
+                <!-- Botón de inicio de sesión -->
                 <Button fx:id="buttonIngresar"
                         onAction="#buttonIngresar"
                         prefHeight="35.0"
                         prefWidth="200.0"
-                        style="-fx-background-color: #0078D7; -fx-text-fill: white;
-                        text="Iniciar Sesión" />
+                        text="Iniciar Sesión"
+                        style="-fx-background-color: #0078D7; -fx-text-fill: white;" />
 
                 <!-- Enlace de registro -->
                 <Hyperlink fx:id="hyperlinkRegistrar"

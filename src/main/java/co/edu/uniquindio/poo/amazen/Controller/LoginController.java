@@ -15,9 +15,16 @@ public class LoginController {
     }
 
     /**
+     * Inicia sesión con las credenciales proporcionadas
+     *
+     * @param documento  Documento de la persona
+     * @param contrasena Contraseña de la persona
+     * @return true si las credenciales son correctas, false en caso contrario
      */
     public boolean iniciarSesion(String documento, String contrasena) {
+        Persona persona = amazen.buscarPersonaPorDocumento(documento);
 
+        if (persona != null && persona.getContrasena().equals(contrasena)) {
             sesionUsuario.iniciarSesion(persona);
             System.out.println("✅ Sesión iniciada correctamente para: " + persona.getNombre());
             return true;
