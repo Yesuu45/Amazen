@@ -3,34 +3,27 @@ package co.edu.uniquindio.poo.amazen.ViewController;
 import co.edu.uniquindio.poo.amazen.Model.Strategy.EstrategiaVista;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 /**
  * Controlador principal de la vista Amazen.
- * Administra la navegación entre vistas (Catálogo, Carrito, Historial, Estado)
- * y aplica el patrón Strategy para modificar dinámicamente la interfaz según
- * el tipo de usuario (Cliente, Administrador, Repartidor).
+ * Navega entre pantallas y aplica Strategy según el rol.
  */
 public class AmazenViewController {
 
-    @FXML
-    public Button botonCatalogo;
+    @FXML public Button botonCatalogo;
+    @FXML public Button botonCarrito;
+    @FXML public Button botonHistorial;
+    @FXML public Button botonEstado;
 
-    @FXML
-    public Button botonCarrito;
+    // 👇 botón exclusivo de administradores
+    @FXML public Button botonAdmin;
 
-    @FXML
-    public Button botonHistorial;
-
-    @FXML
-    public Button botonEstado;
-
-    @FXML
-    private Label tituloLabel;
+    @FXML private Label tituloLabel;
 
     private EstrategiaVista estrategiaVista;
 
@@ -42,53 +35,46 @@ public class AmazenViewController {
     }
 
     public void actualizarTitulo(String titulo) {
-        if (tituloLabel != null) {
-            tituloLabel.setText(titulo);
+        if (tituloLabel != null) tituloLabel.setText(titulo);
+    }
+
+    /** Mostrar/ocultar el botón admin desde la estrategia */
+    public void setBotonAdminVisible(boolean visible) {
+        if (botonAdmin != null) {
+            botonAdmin.setVisible(visible);
+            botonAdmin.setDisable(!visible);
         }
     }
 
-    // ============================================================
-    // Navegación entre escenas
-    // ============================================================
+    // ================= Navegación =================
 
-    @FXML
-    private void irAlCatalogo() {
-        cambiarEscena("/co/edu/uniquindio/poo/amazen/catalogo.fxml", botonCatalogo);
+    @FXML private void irAlCatalogo() { cambiarEscena("/co/edu/uniquindio/poo/amazen/catalogo.fxml", botonCatalogo); }
+    @FXML private void irAlCarrito()  { cambiarEscena("/co/edu/uniquindio/poo/amazen/carrito.fxml", botonCarrito); }
+    @FXML private void irAlHistorial(){ cambiarEscena("/co/edu/uniquindio/poo/amazen/historial.fxml", botonHistorial); }
+    @FXML private void irAlEstado()   { cambiarEscena("/co/edu/uniquindio/poo/amazen/estado.fxml", botonEstado); }
+
+    /** 👉 abre el formulario de administración */
+    @FXML private void irAGestionAdmin() {
+        cambiarEscena("/co/edu/uniquindio/poo/amazen/Admin.fxml", botonAdmin);
     }
 
-    @FXML
-    private void irAlCarrito() {
-        cambiarEscena("/co/edu/uniquindio/poo/amazen/carrito.fxml", botonCarrito);
-    }
-
-    @FXML
-    private void irAlHistorial() {
-        cambiarEscena("/co/edu/uniquindio/poo/amazen/historial.fxml", botonHistorial);
-    }
-
-    @FXML
-    private void irAlEstado() {
-        cambiarEscena("/co/edu/uniquindio/poo/amazen/estado.fxml", botonEstado);
-    }
-
-    private void cambiarEscena(String fxmlRuta, Button boton) {
+    /** Carga el FXML y cambia la escena en el mismo Stage */
+    private void cambiarEscena(String fxmlRuta, Button origen) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlRuta));
-            AnchorPane root = loader.load();
+            Parent root = loader.load(); // ❗ Parent (no AnchorPane)
 
-            // Reaplicar estrategia si se mantiene
-            Object controller = loader.getController();
-            if (controller instanceof AmazenViewController && estrategiaVista != null) {
-                ((AmazenViewController) controller).setEstrategiaVista(estrategiaVista);
+            // Si navegamos a otra vista Amazen, reinyectar estrategia
+            Object ctrl = loader.getController();
+            if (ctrl instanceof AmazenViewController && estrategiaVista != null) {
+                ((AmazenViewController) ctrl).setEstrategiaVista(estrategiaVista);
             }
 
-            Stage stage = (Stage) boton.getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
+            Stage stage = (Stage) origen.getScene().getWindow();
+            stage.setScene(new Scene(root));
             stage.show();
-
         } catch (Exception e) {
-            System.err.println("Error al cambiar la escena: " + fxmlRuta);
+            System.err.println("[Amazen] Error al cambiar a: " + fxmlRuta);
             e.printStackTrace();
         }
     }

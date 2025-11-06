@@ -53,12 +53,12 @@ public class LoginViewController {
 
     private void abrirVentanaPrincipal(Persona persona) {
         try {
-            // 🔹 Ruta corregida sin "ViewController"
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/co/edu/uniquindio/poo/amazen/amazen.fxml"));
             Scene scene = new Scene(loader.load());
 
             AmazenViewController controller = loader.getController();
 
+            // 👇 Usa la clase correcta (EstrategiaUsuario)
             EstrategiaVista estrategia;
             if (persona instanceof Administrador) {
                 estrategia = new EstrategiaAdmin();
@@ -70,7 +70,8 @@ public class LoginViewController {
 
             controller.setEstrategiaVista(estrategia);
 
-            Stage stage = new Stage();
+            // Reutiliza la misma ventana (Stage actual)
+            Stage stage = (Stage) buttonIngresar.getScene().getWindow();
             stage.setTitle("Panel - " + persona.getNombre());
             stage.setScene(scene);
             stage.show();
@@ -80,6 +81,7 @@ public class LoginViewController {
             mostrarAlerta("Error", "No se pudo abrir la vista principal de Amazen.", Alert.AlertType.ERROR);
         }
     }
+
 
     @FXML
     void hyperlinkRegistrar(ActionEvent event) {

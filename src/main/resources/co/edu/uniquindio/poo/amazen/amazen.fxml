@@ -50,6 +50,11 @@
                         style="-fx-background-color: #ff6666; -fx-text-fill: white;
                                -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10;"
                         prefWidth="220" prefHeight="45"/>
+
+                <Button fx:id="botonAdmin"
+                        text="Gestión Admin"
+                        onAction="#irAGestionAdmin"
+                        visible="false"  disable="true"/>
             </VBox>
 
         </VBox>
