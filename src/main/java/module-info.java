@@ -4,6 +4,7 @@ module co.edu.uniquindio.poo.amazen {
     requires javafx.base;
     requires javafx.graphics;
     requires static lombok;
+    requires java.desktop;
 
 
     opens co.edu.uniquindio.poo.amazen to javafx.fxml;
@@ -13,4 +14,6 @@ module co.edu.uniquindio.poo.amazen {
     exports co.edu.uniquindio.poo.amazen ;
     exports co.edu.uniquindio.poo.amazen.ViewController ;
     exports co.edu.uniquindio.poo.amazen.Model ;
+    exports co.edu.uniquindio.poo.amazen.Model.Persona;
+    opens co.edu.uniquindio.poo.amazen.Model.Persona to javafx.fxml;
 }

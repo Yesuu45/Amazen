@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="500.0" prefWidth="800.0"
+            style="-fx-background-color: linear-gradient(to bottom right, #f8f9fa, #e9ecef);"
+            xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="co.edu.uniquindio.poo.amazen.ViewController.LoginViewController">
+
+    <children>
+
+        <!-- Panel principal con sombra y bordes redondeados -->
+        <VBox alignment="CENTER"
+              layoutX="200.0"
+              layoutY="70.0"
+              prefHeight="360.0"
+              prefWidth="400.0"
+              spacing="20"
+              style="-fx-background-color: white; -fx-background-radius: 15;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3);">
+
+            <padding>
+                <Insets bottom="30" left="30" right="30" top="30" />
+            </padding>
+
+            <children>
+
+                <!-- Logo o nombre de la empresa -->
+                <Label text="Amazen" style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+
+                <!-- Campos de texto -->
+                <VBox prefWidth="300.0" spacing="10">
+                    <children>
+                        <TextField fx:id="textFieldID"
+                                   promptText="Número de identificación"
+                                   style="-fx-background-radius: 8; -fx-padding: 8;" />
+                        <PasswordField fx:id="textFieldPassword"
+                                       promptText="Contraseña"
+                                       style="-fx-background-radius: 8; -fx-padding: 8;" />
+                    </children>
+                </VBox>
+
+                <!-- Botón de inicio de sesión -->
+                <Button fx:id="buttonIngresar"
+                        onAction="#buttonIngresar"
+                        prefHeight="35.0"
+                        prefWidth="200.0"
+                        text="Iniciar Sesión"
+                        style="-fx-background-color: #0078D7; -fx-text-fill: white;" />
+
+                <!-- Enlace de registro -->
+                <Hyperlink fx:id="hyperlinkRegistrar"
+                           onAction="#hyperlinkRegistrar"
+                           style="-fx-text-fill: #0078D7;"
+                           text="¿No tienes una cuenta? Regístrate aquí" />
+            </children>
+
+        </VBox>
+    </children>
+</AnchorPane>
