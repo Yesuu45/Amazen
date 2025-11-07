@@ -2,51 +2,36 @@ package co.edu.uniquindio.poo.amazen.Controller;
 
 import co.edu.uniquindio.poo.amazen.Model.Amazen;
 import co.edu.uniquindio.poo.amazen.Model.Persona.Persona;
-import co.edu.uniquindio.poo.amazen.Model.Persona.SesionUsuario;
 
+/**
+ * Controlador de autenticación.
+ * Se apoya en el singleton Amazen para acceder a la lista global de usuarios.
+ */
 public class LoginController {
 
-    private final Amazen amazen;
-    private final SesionUsuario sesionUsuario;
-
-    public LoginController() {
-        this.amazen = Amazen.getInstance();
-        this.sesionUsuario = SesionUsuario.instancia();
-    }
+    private Persona personaActiva;
 
     /**
-     * Inicia sesión con las credenciales proporcionadas
-     *
-     * @param documento  Documento de la persona
-     * @param contrasena Contraseña de la persona
-     * @return true si las credenciales son correctas, false en caso contrario
+     * Intenta iniciar sesión con el documento y contraseña dados.
+     * @return true si las credenciales son válidas, false en caso contrario.
      */
     public boolean iniciarSesion(String documento, String contrasena) {
-        Persona persona = amazen.buscarPersonaPorDocumento(documento);
+        // obtener instancia única del modelo
+        Amazen amazen = Amazen.getInstance();
 
-        if (persona != null && persona.getContrasena().equals(contrasena)) {
-            sesionUsuario.iniciarSesion(persona);
-            System.out.println("✅ Sesión iniciada correctamente para: " + persona.getNombre());
-            return true;
+        // buscar persona con ese documento
+        for (Persona p : amazen.getListaPersonas()) {
+            if (p.getDocumento().equalsIgnoreCase(documento) &&
+                    p.getContrasena().equals(contrasena)) {
+                personaActiva = p;
+                return true;
+            }
         }
-
-        System.out.println("❌ Credenciales incorrectas.");
         return false;
     }
 
-    /**
-     * Cierra la sesión actual.
-     */
-    public void cerrarSesion() {
-        sesionUsuario.cerrarSesion();
-        System.out.println("🔒 Sesión cerrada correctamente.");
-    }
-
-    public boolean haySesionActiva() {
-        return sesionUsuario.haySesionActiva();
-    }
-
+    /** Devuelve la persona actualmente autenticada */
     public Persona getPersonaActiva() {
-        return sesionUsuario.getPersona();
+        return personaActiva;
     }
 }
