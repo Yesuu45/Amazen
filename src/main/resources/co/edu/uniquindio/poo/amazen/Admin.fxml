@@ -44,11 +44,13 @@
 
                     <!-- Fila 4 -->
                     <Label text="Dirección" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                    <TextField fx:id="txtDireccion" promptText="Dirección" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.columnSpan="3"/>
+                    <TextField fx:id="txtDireccion" promptText="Dirección"
+                               GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.columnSpan="3"/>
 
                     <!-- Fila 5 -->
                     <Label text="Contraseña" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-                    <PasswordField fx:id="txtContrasena" promptText="Contraseña" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                    <PasswordField fx:id="txtContrasena" promptText="Contraseña"
+                                   GridPane.columnIndex="1" GridPane.rowIndex="4"/>
                 </GridPane>
             </content>
         </TitledPane>
@@ -65,20 +67,33 @@
                 <TableColumn fx:id="colCelular" text="Celular" prefWidth="120"/>
                 <TableColumn fx:id="colDireccion" text="Dirección" prefWidth="240"/>
                 <TableColumn fx:id="colCargo" text="Cargo" prefWidth="140"/>
+                <TableColumn fx:id="colDisponibilidad" text="Disponibilidad" prefWidth="140"/>
             </columns>
         </TableView>
     </center>
 
     <bottom>
-        <HBox spacing="10">
+        <VBox spacing="8">
             <padding>
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
-            <Button fx:id="btnCrear" text="Crear Admin" onAction="#onCrear"/>
-            <Button fx:id="btnActualizar" text="Actualizar" onAction="#onActualizar"/>
-            <Button fx:id="btnEliminar" text="Eliminar" onAction="#onEliminar"/>
-            <Button fx:id="btnLimpiar" text="Limpiar" onAction="#onLimpiar"/>
-            <Button fx:id="btnLoginTest" text="Probar Login (doc/clave)" onAction="#onLoginTest"/>
-        </HBox>
+
+            <!-- Botonera CRUD -->
+            <HBox spacing="10">
+                <Button fx:id="btnCrear" text="Crear Admin" onAction="#onCrear"/>
+                <Button fx:id="btnActualizar" text="Actualizar" onAction="#onActualizar"/>
+                <Button fx:id="btnEliminar" text="Eliminar" onAction="#onEliminar"/>
+                <Button fx:id="btnLimpiar" text="Limpiar" onAction="#onLimpiar"/>
+                <Button fx:id="btnLoginTest" text="Probar Login (doc/clave)" onAction="#onLoginTest"/>
+                <Button fx:id="botonVolver" text="Volver" onAction="#onVolver"/>
+            </HBox>
+
+            <!-- Sección SOLO para Repartidor -->
+            <HBox fx:id="hbxDisponibilidad" spacing="10" visible="false" managed="false">
+                <Label text="Disponibilidad:"/>
+                <ComboBox fx:id="cmbDisponibilidad" prefWidth="150"/>
+                <Button fx:id="btnCambiarDisponibilidad" text="Guardar" onAction="#onCambiarDisponibilidad"/>
+            </HBox>
+        </VBox>
     </bottom>
 </BorderPane>

@@ -1,13 +1,14 @@
 package co.edu.uniquindio.poo.amazen.Model.Persona;
 
+import co.edu.uniquindio.poo.amazen.Model.Disponibilidad;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Getter
-@SuperBuilder
 @Setter
-
+@SuperBuilder
 public class Repartidor extends Persona {
     private String ZonaCobertura;
+    private Disponibilidad disponibilidad; // NUEVO
 }

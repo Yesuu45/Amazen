@@ -40,13 +40,16 @@ public class LoginViewController {
 
         if (exito) {
             Persona persona = loginController.getPersonaActiva();
+
+            // 🔹 Guardar el usuario logueado globalmente
+            co.edu.uniquindio.poo.amazen.Model.Persona.SesionUsuario
+                    .instancia().iniciarSesion(persona);
+
             mostrarAlerta("Bienvenido", "Sesión iniciada correctamente para " + persona.getNombre(), Alert.AlertType.INFORMATION);
             abrirVentanaPrincipal(persona);
-
-            // Cierra la ventana de login
             ((Stage) buttonIngresar.getScene().getWindow()).close();
-
-        } else {
+        }
+        else {
             mostrarAlerta("Error", "Credenciales incorrectas. Verifique su ID o contraseña.", Alert.AlertType.ERROR);
         }
     }

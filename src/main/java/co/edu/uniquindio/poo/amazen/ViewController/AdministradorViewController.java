@@ -1,16 +1,30 @@
 package co.edu.uniquindio.poo.amazen.ViewController;
 
+import co.edu.uniquindio.poo.amazen.App;
+import co.edu.uniquindio.poo.amazen.Model.Persona.SesionUsuario;
 import co.edu.uniquindio.poo.amazen.Controller.AdministradorController;
 import co.edu.uniquindio.poo.amazen.Model.Amazen;
+import co.edu.uniquindio.poo.amazen.Model.Disponibilidad;
 import co.edu.uniquindio.poo.amazen.Model.Persona.Administrador;
 import co.edu.uniquindio.poo.amazen.Model.Persona.Persona;
 import co.edu.uniquindio.poo.amazen.Model.Persona.Repartidor;
 import co.edu.uniquindio.poo.amazen.Model.Persona.Usuario;
+import co.edu.uniquindio.poo.amazen.Model.Strategy.EsteategiaUsuario;
+import co.edu.uniquindio.poo.amazen.Model.Strategy.EstrategiaAdmin;
+import co.edu.uniquindio.poo.amazen.Model.Strategy.EstrategiaRepartidor;
+import co.edu.uniquindio.poo.amazen.Model.Strategy.EstrategiaVista;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class AdministradorViewController {
 
@@ -24,6 +38,12 @@ public class AdministradorViewController {
     @FXML private TextField txtCelular;
     @FXML private PasswordField txtContrasena;
 
+    // ======= Sección Disponibilidad (Repartidor) =======
+    @FXML private HBox hbxDisponibilidad;                // Contenedor visible/managed
+    @FXML private ComboBox<String> cmbDisponibilidad;     // ACTIVO / INACTIVO / EN_RUTA
+    @FXML private Button btnCambiarDisponibilidad;
+    @FXML private Button botonVolver;// Guardar
+
     // ======= Tabla y columnas =======
     @FXML private TableView<Persona> tblPersonas;
     @FXML private TableColumn<Persona, String> colDocumento;
@@ -34,6 +54,7 @@ public class AdministradorViewController {
     @FXML private TableColumn<Persona, String> colCelular;
     @FXML private TableColumn<Persona, String> colDireccion;
     @FXML private TableColumn<Persona, String> colCargo;
+    @FXML private TableColumn<Persona, String> colDisponibilidad; // NUEVA
 
     // ======= Botones =======
     @FXML private Button btnCrear;
@@ -47,10 +68,10 @@ public class AdministradorViewController {
 
     @FXML
     public void initialize() {
-        // Forzar carga del singleton
+        // 1) Forzar carga del singleton (usuarios demo)
         Amazen.getInstance();
 
-        // Columnas
+        // 2) Configurar columnas
         colDocumento.setCellValueFactory(c -> new SimpleStringProperty(nvl(c.getValue().getDocumento())));
         colNombre.setCellValueFactory(c -> new SimpleStringProperty(nvl(c.getValue().getNombre())));
         colApellido.setCellValueFactory(c -> new SimpleStringProperty(nvl(c.getValue().getApellido())));
@@ -59,17 +80,33 @@ public class AdministradorViewController {
         colCelular.setCellValueFactory(c -> new SimpleStringProperty(nvl(c.getValue().getCelular())));
         colDireccion.setCellValueFactory(c -> new SimpleStringProperty(nvl(c.getValue().getDireccion())));
         colCargo.setCellValueFactory(c -> new SimpleStringProperty(getCargo(c.getValue())));
+        // NUEVA: Disponibilidad
+        colDisponibilidad.setCellValueFactory(c -> {
+            Persona p = c.getValue();
+            if (p instanceof Repartidor r && r.getDisponibilidad() != null) {
+                return new SimpleStringProperty(r.getDisponibilidad().name());
+            } else {
+                return new SimpleStringProperty("—");
+            }
+        });
 
-        // Cargar personas a la tabla
+        // 3) Poblar tabla
         personasView.setAll(Amazen.getInstance().getListaPersonas());
         tblPersonas.setItems(personasView);
         tblPersonas.setPlaceholder(new Label("No hay personas para mostrar"));
 
-        // Selección: llena formulario y habilita botones correctamente
-        tblPersonas.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, sel) -> {
-            if (sel == null) return;
+        // 4) Estado base de la sección de disponibilidad
+        setDisponibilidadSection(false, null);
 
-            // Campos comunes
+        // 5) Listener de selección
+        tblPersonas.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, sel) -> {
+            if (sel == null) {
+                setCrudEnabled(true);               // modo crear admin
+                setDisponibilidadSection(false, null);
+                return;
+            }
+
+            // Rellenar campos comunes
             txtDocumento.setText(nvl(sel.getDocumento()));
             txtNombre.setText(nvl(sel.getNombre()));
             txtApellido.setText(nvl(sel.getApellido()));
@@ -80,20 +117,28 @@ public class AdministradorViewController {
             txtContrasena.clear();
 
             if (sel instanceof Administrador) {
-                // CRUD completo para Admin
+                // CRUD completo
                 setCrudEnabled(true);
                 btnCrear.setDisable(false);
                 txtDocumento.setEditable(true);
-            } else {
-                // Usuario/Repartidor: permitir actualizar/eliminar, NO crear
+                setDisponibilidadSection(false, null);
+            } else if (sel instanceof Repartidor rep) {
+                // Actualizar/eliminar, NO crear; mostrar disponibilidad
                 btnCrear.setDisable(true);
                 btnActualizar.setDisable(false);
                 btnEliminar.setDisable(false);
-                txtDocumento.setEditable(false); // documento = llave
+                txtDocumento.setEditable(false);
+                setDisponibilidadSection(true, rep);
+            } else { // Usuario
+                btnCrear.setDisable(true);
+                btnActualizar.setDisable(false);
+                btnEliminar.setDisable(false);
+                txtDocumento.setEditable(false);
+                setDisponibilidadSection(false, null);
             }
         });
 
-        // Estado inicial: permitir crear admin
+        // 6) Estado inicial: permitir crear admin
         setCrudEnabled(true);
     }
 
@@ -113,8 +158,6 @@ public class AdministradorViewController {
                     getTxt(txtContrasena)
             );
             info("Creado", "Administrador: " + creado.getNombre() + " " + creado.getApellido());
-
-            // reflejar en la tabla y limpiar
             personasView.setAll(Amazen.getInstance().getListaPersonas());
             tblPersonas.refresh();
             limpiarFormulario();
@@ -130,7 +173,6 @@ public class AdministradorViewController {
             String doc = getTxt(txtDocumento);
 
             if (seleccionado == null) {
-                // si no hay selección, asumimos flujo admin por documento
                 boolean ok = controller.actualizarAdministrador(
                         doc,
                         nullIfBlank(txtNombre.getText()),
@@ -168,6 +210,7 @@ public class AdministradorViewController {
                 if (ok) info("Actualizado", "Datos actualizados.");
             }
 
+            // refrescar todo (incluye columna Disponibilidad)
             personasView.setAll(Amazen.getInstance().getListaPersonas());
             tblPersonas.refresh();
             txtContrasena.clear();
@@ -228,7 +271,30 @@ public class AdministradorViewController {
         else error("Login fallido", "Credenciales inválidas.");
     }
 
-    // ======= Util =======
+    // ======= Cambiar disponibilidad (Repartidor) =======
+    @FXML
+    private void onCambiarDisponibilidad() {
+        var seleccionado = tblPersonas.getSelectionModel().getSelectedItem();
+        if (!(seleccionado instanceof Repartidor rep)) {
+            error("Acción inválida", "Debes seleccionar un repartidor.");
+            return;
+        }
+        String nueva = (cmbDisponibilidad != null) ? cmbDisponibilidad.getValue() : null;
+        if (nueva == null || nueva.isBlank()) {
+            error("Campo vacío", "Selecciona una disponibilidad.");
+            return;
+        }
+        try {
+            controller.cambiarDisponibilidad(rep.getDocumento(), Disponibilidad.valueOf(nueva));
+            info("Éxito", "Disponibilidad actualizada a " + nueva + ".");
+            // refresca para que la columna muestre el valor actualizado
+            tblPersonas.refresh();
+        } catch (Exception e) {
+            error("No se pudo guardar", e.getMessage());
+        }
+    }
+
+    // ======= Helpers =======
 
     private void setCrudEnabled(boolean enabled) {
         btnCrear.setDisable(!enabled);
@@ -237,13 +303,39 @@ public class AdministradorViewController {
         txtDocumento.setEditable(enabled);
     }
 
+    private void setDisponibilidadSection(boolean show, Repartidor rep) {
+        if (hbxDisponibilidad != null) {
+            hbxDisponibilidad.setVisible(show);
+            hbxDisponibilidad.setManaged(show);
+        }
+        if (!show) {
+            if (cmbDisponibilidad != null) {
+                cmbDisponibilidad.setDisable(true);
+                cmbDisponibilidad.setValue(null);
+            }
+            if (btnCambiarDisponibilidad != null) btnCambiarDisponibilidad.setDisable(true);
+            return;
+        }
+        if (cmbDisponibilidad != null) {
+            if (cmbDisponibilidad.getItems().isEmpty()) {
+                cmbDisponibilidad.getItems().setAll("ACTIVO", "INACTIVO", "EN_RUTA");
+            }
+            String value = (rep != null && rep.getDisponibilidad() != null)
+                    ? rep.getDisponibilidad().name()
+                    : "INACTIVO";
+            cmbDisponibilidad.setValue(value);
+            cmbDisponibilidad.setDisable(false);
+        }
+        if (btnCambiarDisponibilidad != null) btnCambiarDisponibilidad.setDisable(false);
+    }
+
     private void limpiarFormulario() {
         txtDocumento.clear(); txtNombre.clear(); txtApellido.clear();
         txtEmail.clear(); txtTelefono.clear(); txtDireccion.clear();
         txtCelular.clear(); txtContrasena.clear();
         tblPersonas.getSelectionModel().clearSelection();
-        // por defecto: permitir crear admin
-        setCrudEnabled(true);
+        setCrudEnabled(true);                      // modo crear admin por defecto
+        setDisponibilidadSection(false, null);     // ocultar sección
     }
 
     private static String getTxt(TextField t) {
@@ -284,5 +376,63 @@ public class AdministradorViewController {
         alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
         var result = alert.showAndWait();
         return result.isPresent() && result.get() == ButtonType.YES;
+    }
+
+    @FXML
+    private void onVolver() {
+        final String FXML_AMAZEN = "/co/edu/uniquindio/poo/amazen/amazen.fxml";
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_AMAZEN));
+            Scene scene = new Scene(loader.load());
+
+            // Obtener el controlador y la persona logueada
+            AmazenViewController avc = loader.getController();
+            Persona persona = SesionUsuario.instancia().getPersona();
+
+            // Aplicar la estrategia correspondiente
+            if (persona != null) {
+                EstrategiaVista estrategia = estrategiaPara(persona);
+                avc.setEstrategiaVista(estrategia);
+            }
+
+            // Volver a la ventana principal
+            Stage stage = (Stage) botonVolver.getScene().getWindow();
+            stage.setScene(scene);
+            stage.setTitle("Amazen");
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            mostrarAlerta("Error", "No se pudo volver a la pantalla principal.");
+        }
+    }
+
+    /** Devuelve la estrategia visual según el tipo de usuario logueado */
+    private EstrategiaVista estrategiaPara(Persona persona) {
+        if (persona instanceof Administrador) {
+            return new EstrategiaAdmin();
+        } else if (persona instanceof Repartidor) {
+            return new EstrategiaRepartidor();
+        } else {
+            return new EsteategiaUsuario();
+        }
+    }
+
+
+
+
+
+
+
+    private void mostrarAlerta(String titulo, String msg) {
+        Alert a = new Alert(Alert.AlertType.WARNING);
+        a.setTitle(titulo); a.setHeaderText(null); a.setContentText(msg);
+        a.showAndWait();
+    }
+
+    private void mostrarInfo(String titulo, String msg) {
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setTitle(titulo); a.setHeaderText(null); a.setContentText(msg);
+        a.showAndWait();
     }
 }
