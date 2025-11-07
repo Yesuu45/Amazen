@@ -5,6 +5,7 @@ import co.edu.uniquindio.poo.amazen.Controller.ProductoController;
 import co.edu.uniquindio.poo.amazen.Model.CarritoDeCompras;
 import co.edu.uniquindio.poo.amazen.Model.Inventario;
 import co.edu.uniquindio.poo.amazen.Model.Producto;
+import co.edu.uniquindio.poo.amazen.Model.Strategy.*;
 import co.edu.uniquindio.poo.amazen.Model.TiendaSession;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,23 +21,44 @@ import java.io.IOException;
 import java.util.List;
 
 public class CatalogoViewController {
+
+    private EstrategiaVistaCatalogo estrategiaVistaCatalogo;
+
+    // =================== TABLA ===================
+    @FXML private TableView<Producto> tablaProductos;
+    @FXML private TableColumn<Producto, String> colId;
+    @FXML private TableColumn<Producto, String> colNombre;
+    @FXML private TableColumn<Producto, Double> colPrecio;
+    @FXML private TableColumn<Producto, Boolean> colDisponible;
+
+    // =================== CAMPOS ===================
+    @FXML private TextField txtId;
+    @FXML private TextField txtNombre;
+    @FXML private TextField txtPrecio;
+
+    @FXML private CheckBox chkDisponible;
+
+    // =================== BUSQUEDA / CANTIDAD ===================
+    @FXML private TextField txtBuscar;
+    @FXML private TextField txtCantidad;
+
+    // =================== BOTONES ===================
+    @FXML private Button btnBuscar;
+    @FXML private Button btnMostrarTodos;
+    @FXML private Button btnAgregarCarrito;
+    @FXML private Button btnClonar;
+    @FXML private Button btnAgregar;
+    @FXML private Button btnLimpiar;
     @FXML
-    private TableView<Producto> tablaProductos;
-    @FXML private TableColumn<Producto, String> columnaNombre;
-    @FXML private TableColumn<Producto, Double> columnaPrecio;
+    private Button botonVolver;
 
-    @FXML private TextField campoBusqueda;
-    @FXML private TextField campoCantidad;
-    @FXML private Button botonBuscar;
-    @FXML private Button botonAgregar;
-    @FXML private Button botonClonar;
-    @FXML private Button botonVolver;
+    // =================== PANELES ===================
+    @FXML private TitledPane panelAgregarProducto;
 
+    // =================== CONTROLADORES ===================
     private ProductoController productoController;
     private CarritoDeCompras carrito;
     private ObservableList<Producto> datosTabla;
-
-    public CatalogoViewController() { }
 
     @FXML
     private void initialize() {
@@ -44,39 +66,104 @@ public class CatalogoViewController {
         carrito = TiendaSession.getInstance().getCarrito();
         productoController = new ProductoController(inventario);
 
-        columnaNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
-        columnaPrecio.setCellValueFactory(new PropertyValueFactory<>("precio"));
+        // Configuración de columnas
+        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+        colPrecio.setCellValueFactory(new PropertyValueFactory<>("precio"));
+        colDisponible.setCellValueFactory(new PropertyValueFactory<>("disponible"));
 
-        datosTabla = FXCollections.observableArrayList();
-        datosTabla.setAll(productoController.obtenerTodos());
+        // Cargar productos iniciales
+        datosTabla = FXCollections.observableArrayList(productoController.obtenerTodos());
         tablaProductos.setItems(datosTabla);
 
-        if (campoCantidad != null) {
-            campoCantidad.setText("1");
+        // ===== Aplicar estrategia según usuario =====
+        if(TiendaSession.getInstance().esAdministrador()){
+            setEstrategiaVistaCatalogo(new EstrategiaCatalogoAdmin());
+        } else {
+            setEstrategiaVistaCatalogo(new EstrategiaCatalogoUsuario());
         }
     }
 
+    // ================= STRATEGY =================
+    public void setEstrategiaVistaCatalogo(EstrategiaVistaCatalogo estrategiaVistaCatalogo) {
+        this.estrategiaVistaCatalogo = estrategiaVistaCatalogo;
+        if (this.estrategiaVistaCatalogo != null) {
+            this.estrategiaVistaCatalogo.mostrarCatalogo(this);
+        }
+    }
+
+    public void mostrarPanelAgregarProducto(boolean visible) {
+        if (panelAgregarProducto != null) {
+            panelAgregarProducto.setVisible(visible);
+            panelAgregarProducto.setManaged(visible);
+        }
+    }
+
+    public void mostrarBotonAgregarCarrito(boolean visible) {
+        if (btnAgregarCarrito != null) {
+            btnAgregarCarrito.setVisible(visible);
+            btnAgregarCarrito.setManaged(visible);
+        }
+    }
+
+    public void mostrarBotonClonar(boolean visible) {
+        if (btnClonar != null) {
+            btnClonar.setVisible(visible);
+            btnClonar.setManaged(visible);
+        }
+    }
+
+    // ================= ACCIONES =================
     @FXML
     private void buscarProducto() {
-        String nombre = campoBusqueda.getText();
-        List<Producto> res = productoController.buscarPorNombre(nombre);
-        datosTabla.setAll(res);
+        String nombre = txtBuscar.getText().trim();
+        List<Producto> resultados = productoController.buscarPorNombre(nombre);
+        datosTabla.setAll(resultados);
+    }
+
+    @FXML
+    private void mostrarTodos() {
+        datosTabla.setAll(productoController.obtenerTodos());
     }
 
     @FXML
     private void agregarAlCarrito() {
         Producto seleccionado = tablaProductos.getSelectionModel().getSelectedItem();
         if (seleccionado == null) {
-            mostrarAlerta("Selecciona un producto", "Debes seleccionar un producto de la tabla.");
+            mostrarAlerta("Selecciona un producto", "Debes seleccionar un producto para agregar al carrito.");
             return;
         }
         int cantidad = leerCantidad();
         if (cantidad <= 0) {
-            mostrarAlerta("Cantidad inválida", "La cantidad debe ser un número entero positivo.");
+            mostrarAlerta("Cantidad inválida", "La cantidad debe ser mayor que cero.");
             return;
         }
         carrito.agregarProducto(seleccionado, cantidad);
-        mostrarInfo("Agregado", "Se agregó al carrito: " + seleccionado.getNombre() + " x" + cantidad);
+        mostrarInfo("Agregado al carrito", "Producto agregado: " + seleccionado.getNombre() + " x" + cantidad);
+    }
+
+    @FXML
+    private void agregarProducto() {
+        String id = txtId.getText().trim();
+        String nombre = txtNombre.getText().trim();
+        String precioStr = txtPrecio.getText().trim();
+        boolean disponible = chkDisponible.isSelected();
+
+        if (id.isEmpty() || nombre.isEmpty() || precioStr.isEmpty()) {
+            mostrarAlerta("Campos vacíos", "Por favor, completa todos los campos del producto.");
+            return;
+        }
+
+        try {
+            double precio = Double.parseDouble(precioStr);
+            Producto nuevo = new Producto(id, nombre, precio, disponible);
+            TiendaSession.getInstance().getInventario().agregarProducto(nuevo);
+            datosTabla.setAll(productoController.obtenerTodos());
+            limpiarCampos();
+            mostrarInfo("Producto agregado", "Se ha agregado el producto correctamente.");
+        } catch (NumberFormatException e) {
+            mostrarAlerta("Precio inválido", "El precio debe ser un número válido.");
+        }
     }
 
     @FXML
@@ -89,44 +176,66 @@ public class CatalogoViewController {
         Producto clon = productoController.clonarProducto(seleccionado);
         if (clon != null) {
             datosTabla.setAll(productoController.obtenerTodos());
-            mostrarInfo("Producto clonado", "Se creó el clon con id: " + clon.getId());
+            mostrarInfo("Clon creado", "Se clonó el producto con id: " + clon.getId());
         } else {
-            mostrarAlerta("Error", "No fue posible clonar el producto.");
+            mostrarAlerta("Error", "No se pudo clonar el producto.");
         }
     }
 
     @FXML
-    private void onVolver() {
+    private void limpiarCampos() {
+        txtId.clear();
+        txtNombre.clear();
+        txtPrecio.clear();
+        chkDisponible.setSelected(false);
+        txtBuscar.clear();
+        txtCantidad.setText("1");
+        tablaProductos.getSelectionModel().clearSelection();
+    }
+
+    // =================== BOTÓN VOLVER ===================
+    @FXML
+    void onVolver() {
         try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(App.class.getResource("amazen.fxml"));
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("amazen.fxml"));
             AnchorPane root = loader.load();
             Stage stage = (Stage) botonVolver.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            mostrarAlerta("Error", "No se pudo volver a la pantalla principal.");
         }
     }
 
+    // ================= UTILIDADES =================
     private int leerCantidad() {
         try {
-            return Integer.parseInt(campoCantidad.getText().trim());
-        } catch (Exception e) {
+            return Integer.parseInt(txtCantidad.getText().trim());
+        } catch (NumberFormatException e) {
             return -1;
         }
     }
 
-    private void mostrarAlerta(String titulo, String msg) {
-        Alert a = new Alert(Alert.AlertType.WARNING);
-        a.setTitle(titulo); a.setHeaderText(null); a.setContentText(msg);
-        a.showAndWait();
+    private void mostrarAlerta(String titulo, String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.WARNING);
+        alerta.setTitle(titulo);
+        alerta.setHeaderText(null);
+        alerta.setContentText(mensaje);
+        alerta.showAndWait();
     }
 
-    private void mostrarInfo(String titulo, String msg) {
-        Alert a = new Alert(Alert.AlertType.INFORMATION);
-        a.setTitle(titulo); a.setHeaderText(null); a.setContentText(msg);
-        a.showAndWait();
+    private void mostrarInfo(String titulo, String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
+        alerta.setTitle(titulo);
+        alerta.setHeaderText(null);
+        alerta.setContentText(mensaje);
+        alerta.showAndWait();
+    }
+
+    // ================= MÉTODO PÚBLICO =================
+    public void mostrarCatalogo() {
+        if (estrategiaVistaCatalogo != null) {
+            estrategiaVistaCatalogo.mostrarCatalogo(this);
+        }
     }
 }

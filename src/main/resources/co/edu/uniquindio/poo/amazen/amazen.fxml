@@ -12,14 +12,21 @@
 
     <children>
 
+        <!-- BOTÓN CERRAR SESIÓN -->
+        <Button fx:id="botonCerrarSesion"
+                text="Cerrar Sesión"
+                onAction="#cerrarSesion"
+                layoutX="600" layoutY="20"
+                style="-fx-background-color: #ff4d4d; -fx-text-fill: white;
+                       -fx-font-weight: bold; -fx-background-radius: 8;"
+                prefWidth="100" prefHeight="35"/>
+
         <!-- Contenedor principal -->
         <VBox layoutX="160" layoutY="50" spacing="30" alignment="CENTER" prefWidth="400" prefHeight="420">
 
-            <!-- ===================================================== -->
             <!-- TÍTULO DINÁMICO -->
-            <!-- ===================================================== -->
             <Label fx:id="tituloLabel"
-                   text="Bienvenido a MercadoLibre"
+                   text="Bienvenido a Amazen"
                    style="-fx-font-weight: bold; -fx-text-fill: #2a2a2a;"
                    alignment="CENTER">
                 <font>
@@ -27,9 +34,7 @@
                 </font>
             </Label>
 
-            <!-- ===================================================== -->
             <!-- BOTONES PRINCIPALES -->
-            <!-- ===================================================== -->
             <VBox spacing="20" alignment="CENTER">
                 <Button fx:id="botonCatalogo" text="Ir al Catálogo" onAction="#irAlCatalogo"
                         style="-fx-background-color: #ffcc00; -fx-text-fill: #2a2a2a;

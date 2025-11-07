@@ -6,10 +6,10 @@ public class EstrategiaRepartidor implements EstrategiaVista{
 
     @Override
     public void configurarVista(AmazenViewController controller) {
-        controller.botonCatalogo.setVisible(false);
-        controller.botonCarrito.setVisible(false);
-        controller.botonHistorial.setVisible(false);
-        controller.botonEstado.setVisible(true);
+        controller.mostrarBotonCatalogo(false);
+        controller.mostrarBotonCarrito(false);
+        controller.mostrarBotonHistorial(false);
+        controller.mostrarBotonEstado(true);
 
         controller.actualizarTitulo("Panel Repartidor - MercadoLibre");
     }
