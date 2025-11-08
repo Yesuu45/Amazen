@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="co.edu.uniquindio.poo.amazen.ViewController.AdminEnviosViewController">
+
+    <top>
+        <ToolBar>
+            <Button fx:id="btnRefrescar" text="Refrescar" onAction="#onRefrescar"/>
+            <Separator/>
+            <Label text="Repartidor:"/>
+            <ComboBox fx:id="cmbRepartidores" prefWidth="220"/>
+            <Button text="Asignar" onAction="#onAsignar"/>
+            <Button text="Reasignar" onAction="#onReasignar"/>
+            <Separator/>
+            <MenuButton text="Cambiar estado">
+                <items>
+                    <MenuItem text="Empaquetado" onAction="#onEstadoEmpaquetado"/>
+                    <MenuItem text="Enviado" onAction="#onEstadoEnviado"/>
+                    <MenuItem text="Entregado" onAction="#onEstadoEntregado"/>
+                </items>
+            </MenuButton>
+            <Button text="Registrar incidencia" onAction="#onIncidencia"/>
+        </ToolBar>
+    </top>
+
+    <center>
+        <TableView fx:id="tblPedidos">
+            <columns>
+                <TableColumn fx:id="colId" text="ID" prefWidth="120"/>
+                <TableColumn fx:id="colEstado" text="Estado" prefWidth="140"/>
+                <TableColumn fx:id="colRepartidor" text="Repartidor (doc)" prefWidth="180"/>
+                <TableColumn fx:id="colTotal" text="Total" prefWidth="100"/>
+                <TableColumn fx:id="colCreacion" text="Creación" prefWidth="160"/>
+                <TableColumn fx:id="colAsignacion" text="Asignación" prefWidth="160"/>
+                <TableColumn fx:id="colEntrega" text="Entrega" prefWidth="160"/>
+                <TableColumn fx:id="colIncidencias" text="# Incidencias" prefWidth="110"/>
+            </columns>
+        </TableView>
+    </center>
+
+    <bottom>
+        <HBox spacing="10">
+            <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
+            <Label fx:id="lblInfo" text="Listo."/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Button text="Cerrar" onAction="#onCerrar"/>
+        </HBox>
+    </bottom>
+</BorderPane>

@@ -1,6 +1,5 @@
 package co.edu.uniquindio.poo.amazen.ViewController;
 
-import co.edu.uniquindio.poo.amazen.App;
 import co.edu.uniquindio.poo.amazen.Model.Persona.SesionUsuario;
 import co.edu.uniquindio.poo.amazen.Controller.AdministradorController;
 import co.edu.uniquindio.poo.amazen.Model.Amazen;
@@ -16,11 +15,11 @@ import co.edu.uniquindio.poo.amazen.Model.Strategy.EstrategiaVista;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
@@ -29,6 +28,7 @@ import java.io.IOException;
 public class AdministradorViewController {
 
     // ======= Campos de formulario =======
+    @FXML private ComboBox<String> cmbRol;
     @FXML private TextField txtDocumento;
     @FXML private TextField txtNombre;
     @FXML private TextField txtApellido;
@@ -38,11 +38,15 @@ public class AdministradorViewController {
     @FXML private TextField txtCelular;
     @FXML private PasswordField txtContrasena;
 
+    // Solo Repartidor
+    @FXML private Label lblZona;
+    @FXML private TextField txtZona;
+
     // ======= Sección Disponibilidad (Repartidor) =======
-    @FXML private HBox hbxDisponibilidad;                // Contenedor visible/managed
-    @FXML private ComboBox<String> cmbDisponibilidad;     // ACTIVO / INACTIVO / EN_RUTA
+    @FXML private HBox hbxDisponibilidad;
+    @FXML private ComboBox<String> cmbDisponibilidad;
     @FXML private Button btnCambiarDisponibilidad;
-    @FXML private Button botonVolver;// Guardar
+    @FXML private Button botonVolver;
 
     // ======= Tabla y columnas =======
     @FXML private TableView<Persona> tblPersonas;
@@ -54,7 +58,7 @@ public class AdministradorViewController {
     @FXML private TableColumn<Persona, String> colCelular;
     @FXML private TableColumn<Persona, String> colDireccion;
     @FXML private TableColumn<Persona, String> colCargo;
-    @FXML private TableColumn<Persona, String> colDisponibilidad; // NUEVA
+    @FXML private TableColumn<Persona, String> colDisponibilidad;
 
     // ======= Botones =======
     @FXML private Button btnCrear;
@@ -80,7 +84,6 @@ public class AdministradorViewController {
         colCelular.setCellValueFactory(c -> new SimpleStringProperty(nvl(c.getValue().getCelular())));
         colDireccion.setCellValueFactory(c -> new SimpleStringProperty(nvl(c.getValue().getDireccion())));
         colCargo.setCellValueFactory(c -> new SimpleStringProperty(getCargo(c.getValue())));
-        // NUEVA: Disponibilidad
         colDisponibilidad.setCellValueFactory(c -> {
             Persona p = c.getValue();
             if (p instanceof Repartidor r && r.getDisponibilidad() != null) {
@@ -95,14 +98,17 @@ public class AdministradorViewController {
         tblPersonas.setItems(personasView);
         tblPersonas.setPlaceholder(new Label("No hay personas para mostrar"));
 
-        // 4) Estado base de la sección de disponibilidad
+        // 4) Estado base de secciones
         setDisponibilidadSection(false, null);
+        setZonaVisible(false);
 
         // 5) Listener de selección
         tblPersonas.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, sel) -> {
             if (sel == null) {
-                setCrudEnabled(true);               // modo crear admin
+                setCrudEnabled(true);               // modo crear
                 setDisponibilidadSection(false, null);
+                setZonaVisible(false);
+                cmbRol.getSelectionModel().clearSelection();
                 return;
             }
 
@@ -117,28 +123,50 @@ public class AdministradorViewController {
             txtContrasena.clear();
 
             if (sel instanceof Administrador) {
-                // CRUD completo
+                cmbRol.setValue("Administrador");
                 setCrudEnabled(true);
-                btnCrear.setDisable(false);
-                txtDocumento.setEditable(true);
+                btnCrear.setDisable(true);               // no crear duplicado desde selección
+                txtDocumento.setEditable(false);
                 setDisponibilidadSection(false, null);
+                setZonaVisible(false);
+
             } else if (sel instanceof Repartidor rep) {
-                // Actualizar/eliminar, NO crear; mostrar disponibilidad
+                cmbRol.setValue("Repartidor");
                 btnCrear.setDisable(true);
                 btnActualizar.setDisable(false);
                 btnEliminar.setDisable(false);
                 txtDocumento.setEditable(false);
                 setDisponibilidadSection(true, rep);
+                setZonaVisible(true);
+                txtZona.setText(nvl(rep.getZonaCobertura()));     // asumiendo getZona() existe
+
             } else { // Usuario
+                cmbRol.setValue("Usuario");
                 btnCrear.setDisable(true);
                 btnActualizar.setDisable(false);
                 btnEliminar.setDisable(false);
                 txtDocumento.setEditable(false);
                 setDisponibilidadSection(false, null);
+                setZonaVisible(false);
             }
         });
 
-        // 6) Estado inicial: permitir crear admin
+        // 6) Roles disponibles para creación
+        cmbRol.getItems().setAll("Administrador", "Usuario", "Repartidor");
+        cmbRol.valueProperty().addListener((obs, oldV, rol) -> {
+            boolean isRepartidor = "Repartidor".equals(rol);
+            setZonaVisible(isRepartidor);
+            // Para alta de repartidor, mostrar combo disponibilidad (valor por defecto)
+            setDisponibilidadSection(isRepartidor, null);
+            if (isRepartidor && cmbDisponibilidad != null) {
+                if (cmbDisponibilidad.getItems().isEmpty()) {
+                    cmbDisponibilidad.getItems().setAll("ACTIVO", "INACTIVO", "EN_RUTA");
+                }
+                cmbDisponibilidad.setValue("INACTIVO");
+            }
+        });
+
+        // 7) Estado inicial: permitir crear
         setCrudEnabled(true);
     }
 
@@ -147,20 +175,64 @@ public class AdministradorViewController {
     @FXML
     private void onCrear() {
         try {
-            Administrador creado = controller.crearAdministrador(
-                    getTxt(txtNombre),
-                    getTxt(txtApellido),
-                    getTxt(txtEmail),
-                    getTxt(txtTelefono),
-                    getTxt(txtDireccion),
-                    getTxt(txtCelular),
-                    getTxt(txtDocumento),
-                    getTxt(txtContrasena)
-            );
-            info("Creado", "Administrador: " + creado.getNombre() + " " + creado.getApellido());
+            String rol = cmbRol.getValue();
+            if (rol == null || rol.isBlank()) {
+                throw new IllegalArgumentException("Seleccione un rol para crear.");
+            }
+
+            switch (rol) {
+                case "Administrador" -> {
+                    Administrador creado = controller.crearAdministrador(
+                            getTxt(txtNombre),
+                            getTxt(txtApellido),
+                            getTxt(txtEmail),
+                            getTxt(txtTelefono),
+                            getTxt(txtDireccion),
+                            getTxt(txtCelular),
+                            getTxt(txtDocumento),
+                            getTxt(txtContrasena)
+                    );
+                    info("Creado", "Administrador: " + creado.getNombre() + " " + creado.getApellido());
+                }
+                case "Usuario" -> {
+                    Usuario creado = controller.crearUsuario(
+                            getTxt(txtNombre),
+                            getTxt(txtApellido),
+                            getTxt(txtEmail),
+                            getTxt(txtTelefono),
+                            getTxt(txtDireccion),
+                            getTxt(txtCelular),
+                            getTxt(txtDocumento),
+                            getTxt(txtContrasena)
+                    );
+                    info("Creado", "Usuario: " + creado.getNombre() + " " + creado.getApellido());
+                }
+                case "Repartidor" -> {
+                    String zona = getTxt(txtZona);
+                    String dispStr = (cmbDisponibilidad != null && cmbDisponibilidad.getValue() != null)
+                            ? cmbDisponibilidad.getValue() : "INACTIVO";
+                    Disponibilidad disp = Disponibilidad.valueOf(dispStr);
+                    Repartidor creado = controller.crearRepartidor(
+                            getTxt(txtNombre),
+                            getTxt(txtApellido),
+                            getTxt(txtEmail),
+                            getTxt(txtTelefono),
+                            getTxt(txtDireccion),
+                            getTxt(txtCelular),
+                            getTxt(txtDocumento),
+                            getTxt(txtContrasena),
+                            zona,
+                            disp
+                    );
+                    info("Creado", "Repartidor: " + creado.getNombre() + " (" + creado.getZonaCobertura() + ")");
+                }
+                default -> throw new IllegalArgumentException("Rol no soportado: " + rol);
+            }
+
             personasView.setAll(Amazen.getInstance().getListaPersonas());
             tblPersonas.refresh();
             limpiarFormulario();
+
         } catch (Exception e) {
             error("No se pudo crear", e.getMessage());
         }
@@ -172,19 +244,7 @@ public class AdministradorViewController {
             var seleccionado = tblPersonas.getSelectionModel().getSelectedItem();
             String doc = getTxt(txtDocumento);
 
-            if (seleccionado == null) {
-                boolean ok = controller.actualizarAdministrador(
-                        doc,
-                        nullIfBlank(txtNombre.getText()),
-                        nullIfBlank(txtApellido.getText()),
-                        nullIfBlank(txtEmail.getText()),
-                        nullIfBlank(txtTelefono.getText()),
-                        nullIfBlank(txtDireccion.getText()),
-                        nullIfBlank(txtCelular.getText()),
-                        nullIfBlank(txtContrasena.getText())
-                );
-                if (ok) info("Actualizado", "Datos actualizados.");
-            } else if (seleccionado instanceof Administrador) {
+            if (seleccionado instanceof Administrador) {
                 boolean ok = controller.actualizarAdministrador(
                         doc,
                         nullIfBlank(txtNombre.getText()),
@@ -196,6 +256,24 @@ public class AdministradorViewController {
                         nullIfBlank(txtContrasena.getText())
                 );
                 if (ok) info("Actualizado", "Administrador actualizado.");
+            } else if (seleccionado instanceof Repartidor) {
+                String zona = nullIfBlank(txtZona.getText());
+                String dispStr = (cmbDisponibilidad != null) ? cmbDisponibilidad.getValue() : null;
+                Disponibilidad disp = (dispStr == null || dispStr.isBlank()) ? null : Disponibilidad.valueOf(dispStr);
+
+                boolean ok = controller.actualizarRepartidor(
+                        doc,
+                        nullIfBlank(txtNombre.getText()),
+                        nullIfBlank(txtApellido.getText()),
+                        nullIfBlank(txtEmail.getText()),
+                        nullIfBlank(txtTelefono.getText()),
+                        nullIfBlank(txtDireccion.getText()),
+                        nullIfBlank(txtCelular.getText()),
+                        nullIfBlank(txtContrasena.getText()),
+                        zona,
+                        disp
+                );
+                if (ok) info("Actualizado", "Repartidor actualizado.");
             } else {
                 boolean ok = controller.actualizarPersona(
                         doc,
@@ -207,10 +285,9 @@ public class AdministradorViewController {
                         nullIfBlank(txtCelular.getText()),
                         nullIfBlank(txtContrasena.getText())
                 );
-                if (ok) info("Actualizado", "Datos actualizados.");
+                if (ok) info("Actualizado", "Usuario actualizado.");
             }
 
-            // refrescar todo (incluye columna Disponibilidad)
             personasView.setAll(Amazen.getInstance().getListaPersonas());
             tblPersonas.refresh();
             txtContrasena.clear();
@@ -287,7 +364,6 @@ public class AdministradorViewController {
         try {
             controller.cambiarDisponibilidad(rep.getDocumento(), Disponibilidad.valueOf(nueva));
             info("Éxito", "Disponibilidad actualizada a " + nueva + ".");
-            // refresca para que la columna muestre el valor actualizado
             tblPersonas.refresh();
         } catch (Exception e) {
             error("No se pudo guardar", e.getMessage());
@@ -329,13 +405,20 @@ public class AdministradorViewController {
         if (btnCambiarDisponibilidad != null) btnCambiarDisponibilidad.setDisable(false);
     }
 
+    private void setZonaVisible(boolean show) {
+        if (lblZona != null) { lblZona.setVisible(show); lblZona.setManaged(show); }
+        if (txtZona != null) { txtZona.setVisible(show); txtZona.setManaged(show); }
+    }
+
     private void limpiarFormulario() {
+        cmbRol.getSelectionModel().clearSelection();
         txtDocumento.clear(); txtNombre.clear(); txtApellido.clear();
         txtEmail.clear(); txtTelefono.clear(); txtDireccion.clear();
-        txtCelular.clear(); txtContrasena.clear();
+        txtCelular.clear(); txtContrasena.clear(); txtZona.clear();
         tblPersonas.getSelectionModel().clearSelection();
-        setCrudEnabled(true);                      // modo crear admin por defecto
-        setDisponibilidadSection(false, null);     // ocultar sección
+        setCrudEnabled(true);
+        setDisponibilidadSection(false, null);
+        setZonaVisible(false);
     }
 
     private static String getTxt(TextField t) {
@@ -385,17 +468,11 @@ public class AdministradorViewController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_AMAZEN));
             Scene scene = new Scene(loader.load());
 
-            // Obtener el controlador y la persona logueada
             AmazenViewController avc = loader.getController();
             Persona persona = SesionUsuario.instancia().getPersona();
+            EstrategiaVista estrategia = estrategiaPara(persona);
+            avc.setEstrategiaVista(estrategia);
 
-            // Aplicar la estrategia correspondiente
-            if (persona != null) {
-                EstrategiaVista estrategia = estrategiaPara(persona);
-                avc.setEstrategiaVista(estrategia);
-            }
-
-            // Volver a la ventana principal
             Stage stage = (Stage) botonVolver.getScene().getWindow();
             stage.setScene(scene);
             stage.setTitle("Amazen");
@@ -407,22 +484,11 @@ public class AdministradorViewController {
         }
     }
 
-    /** Devuelve la estrategia visual según el tipo de usuario logueado */
     private EstrategiaVista estrategiaPara(Persona persona) {
-        if (persona instanceof Administrador) {
-            return new EstrategiaAdmin();
-        } else if (persona instanceof Repartidor) {
-            return new EstrategiaRepartidor();
-        } else {
-            return new EsteategiaUsuario();
-        }
+        if (persona instanceof Administrador) return new EstrategiaAdmin();
+        else if (persona instanceof Repartidor) return new EstrategiaRepartidor();
+        else return new EsteategiaUsuario();
     }
-
-
-
-
-
-
 
     private void mostrarAlerta(String titulo, String msg) {
         Alert a = new Alert(Alert.AlertType.WARNING);
@@ -430,9 +496,38 @@ public class AdministradorViewController {
         a.showAndWait();
     }
 
-    private void mostrarInfo(String titulo, String msg) {
-        Alert a = new Alert(Alert.AlertType.INFORMATION);
-        a.setTitle(titulo); a.setHeaderText(null); a.setContentText(msg);
-        a.showAndWait();
+    @FXML
+    private void onAbrirEnvios(ActionEvent e) {
+        final String FXML = "/co/edu/uniquindio/poo/amazen/admin_envios.fxml";
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML));
+            Scene scene = new Scene(loader.load());
+            Stage stage = new Stage();
+            stage.setTitle("Gestión de Envíos (Asignación, Estados, Incidencias)");
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Alert a = new Alert(Alert.AlertType.ERROR, "No se pudo abrir la vista de envíos", ButtonType.OK);
+            a.setHeaderText("Error"); a.showAndWait();
+        }
     }
+
+    @FXML
+    private void onAbrirDashboard() {
+        final String FXML = "/co/edu/uniquindio/poo/amazen/admin_dashboard.fxml";
+        try {
+            var loader = new javafx.fxml.FXMLLoader(getClass().getResource(FXML));
+            var scene = new javafx.scene.Scene(loader.load());
+            var stage = new javafx.stage.Stage();
+            stage.setTitle("Panel de Métricas");
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            var a = new Alert(Alert.AlertType.ERROR, "No se pudo abrir el panel de métricas", ButtonType.OK);
+            a.setHeaderText("Error"); a.showAndWait();
+        }
+    }
+
 }

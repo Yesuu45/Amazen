@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="co.edu.uniquindio.poo.amazen.ViewController.AdminDashboardViewController">
+
+    <top>
+        <ToolBar>
+            <Label text="Desde:"/>
+            <DatePicker fx:id="dpDesde"/>
+            <Label text="Hasta:"/>
+            <DatePicker fx:id="dpHasta"/>
+            <Separator/>
+            <Label text="Zona:"/>
+            <TextField fx:id="txtZona" promptText="(opcional)"/>
+            <Separator/>
+            <Button text="Aplicar filtros" onAction="#onAplicarFiltros"/>
+            <Button text="Exportar CSV" onAction="#onExportarCsv"/>
+        </ToolBar>
+    </top>
+
+    <center>
+        <GridPane hgap="14" vgap="14">
+            <padding>
+                <Insets top="12" right="12" bottom="12" left="12"/>
+            </padding>
+
+            <rowConstraints>
+                <RowConstraints percentHeight="50"/>
+                <RowConstraints percentHeight="50"/>
+            </rowConstraints>
+
+            <columnConstraints>
+                <ColumnConstraints percentWidth="50"/>
+                <ColumnConstraints percentWidth="50"/>
+            </columnConstraints>
+
+            <!-- KPIs -->
+            <TitledPane text="Indicadores clave" expanded="true" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                <content>
+                    <VBox spacing="6">
+                        <padding>
+                            <Insets top="10" right="10" bottom="10" left="10"/>
+                        </padding>
+                        <Label fx:id="lblTotalEntregas" text="Entregas: 0"/>
+                        <Label fx:id="lblTiempoPromedio" text="Tiempo promedio (h): 0"/>
+                        <Label fx:id="lblIngresos" text="Ingresos (estimado): $0.00"/>
+                        <Label fx:id="lblIncidencias" text="Incidencias: 0"/>
+                    </VBox>
+                </content>
+            </TitledPane>
+
+            <!-- Línea -->
+            <TitledPane text="Tiempo promedio de entrega por día" expanded="true"
+                        GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <content>
+                    <LineChart fx:id="lineTiempos" title="" createSymbols="false">
+                        <xAxis><CategoryAxis label="Fecha"/></xAxis>
+                        <yAxis><NumberAxis label="Horas"/></yAxis>
+                    </LineChart>
+                </content>
+            </TitledPane>
+
+            <!-- Barras -->
+            <TitledPane text="Incidencias por zona" expanded="true"
+                        GridPane.columnIndex="0" GridPane.rowIndex="1">
+                <content>
+                    <BarChart fx:id="barIncidenciasZona" title="">
+                        <xAxis><CategoryAxis label="Zona"/></xAxis>
+                        <yAxis><NumberAxis label="Incidencias"/></yAxis>
+                    </BarChart>
+                </content>
+            </TitledPane>
+
+            <!-- Pie -->
+            <TitledPane text="Distribución por estado" expanded="true"
+                        GridPane.columnIndex="1" GridPane.rowIndex="1">
+                <content>
+                    <PieChart fx:id="pieEstados"/>
+                </content>
+            </TitledPane>
+        </GridPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10">
+            <padding><Insets top="8" right="10" bottom="8" left="10"/></padding>
+            <Label fx:id="lblInfo" text="Listo."/>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <Button text="Cerrar" onAction="#onCerrar"/>
+        </HBox>
+    </bottom>
+</BorderPane>

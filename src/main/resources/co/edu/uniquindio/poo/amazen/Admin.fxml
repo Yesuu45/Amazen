@@ -21,36 +21,48 @@
                         <ColumnConstraints percentWidth="30"/>
                     </columnConstraints>
 
-                    <!-- Fila 1 -->
-                    <Label text="Documento" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                    <TextField fx:id="txtDocumento" promptText="Documento" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    <!-- Fila 0: Rol -->
+                    <Label text="Rol" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                    <ComboBox fx:id="cmbRol" promptText="Seleccione rol"
+                              GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-                    <Label text="Nombre" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-                    <TextField fx:id="txtNombre" promptText="Nombre" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+                    <!-- Fila 1 -->
+                    <Label text="Documento" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                    <TextField fx:id="txtDocumento" promptText="Documento" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                    <Label text="Nombre" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                    <TextField fx:id="txtNombre" promptText="Nombre" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
 
                     <!-- Fila 2 -->
-                    <Label text="Apellido" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                    <TextField fx:id="txtApellido" promptText="Apellido" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                    <Label text="Apellido" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                    <TextField fx:id="txtApellido" promptText="Apellido" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
-                    <Label text="Email" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
-                    <TextField fx:id="txtEmail" promptText="Email" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                    <Label text="Email" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+                    <TextField fx:id="txtEmail" promptText="Email" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
 
                     <!-- Fila 3 -->
-                    <Label text="Teléfono" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                    <TextField fx:id="txtTelefono" promptText="Teléfono" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                    <Label text="Teléfono" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                    <TextField fx:id="txtTelefono" promptText="Teléfono" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
 
-                    <Label text="Celular" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-                    <TextField fx:id="txtCelular" promptText="Celular" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+                    <Label text="Celular" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+                    <TextField fx:id="txtCelular" promptText="Celular" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
 
                     <!-- Fila 4 -->
-                    <Label text="Dirección" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                    <Label text="Dirección" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
                     <TextField fx:id="txtDireccion" promptText="Dirección"
-                               GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.columnSpan="3"/>
+                               GridPane.columnIndex="1" GridPane.rowIndex="4" GridPane.columnSpan="3"/>
 
                     <!-- Fila 5 -->
-                    <Label text="Contraseña" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                    <Label text="Contraseña" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
                     <PasswordField fx:id="txtContrasena" promptText="Contraseña"
-                                   GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                                   GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+
+                    <!-- Fila 6: Solo Repartidor -->
+                    <Label fx:id="lblZona" text="Zona" visible="false" managed="false"
+                           GridPane.columnIndex="2" GridPane.rowIndex="5"/>
+                    <TextField fx:id="txtZona" promptText="Zona de cobertura"
+                               visible="false" managed="false"
+                               GridPane.columnIndex="3" GridPane.rowIndex="5"/>
                 </GridPane>
             </content>
         </TitledPane>
@@ -74,18 +86,20 @@
 
     <bottom>
         <VBox spacing="8">
-            <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
-            </padding>
+            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
 
             <!-- Botonera CRUD -->
             <HBox spacing="10">
-                <Button fx:id="btnCrear" text="Crear Admin" onAction="#onCrear"/>
+                <Button fx:id="btnCrear" text="Crear" onAction="#onCrear"/>
                 <Button fx:id="btnActualizar" text="Actualizar" onAction="#onActualizar"/>
                 <Button fx:id="btnEliminar" text="Eliminar" onAction="#onEliminar"/>
                 <Button fx:id="btnLimpiar" text="Limpiar" onAction="#onLimpiar"/>
                 <Button fx:id="btnLoginTest" text="Probar Login (doc/clave)" onAction="#onLoginTest"/>
                 <Button fx:id="botonVolver" text="Volver" onAction="#onVolver"/>
+                <Button text="Gestionar Envíos" onAction="#onAbrirEnvios"/>
+                <Button text="Panel de Métricas" onAction="#onAbrirDashboard"/>
+
+
             </HBox>
 
             <!-- Sección SOLO para Repartidor -->
