@@ -8,6 +8,12 @@ module co.edu.uniquindio.poo.amazen {
     // Lombok solo en compilación
     requires static lombok;
 
+    opens co.edu.uniquindio.poo.amazen to javafx.fxml;
+    opens co.edu.uniquindio.poo.amazen.ViewController to javafx.fxml;
+    opens co.edu.uniquindio.poo.amazen.Model to javafx.fxml;
+    opens co.edu.uniquindio.poo.amazen.Model.Strategy to javafx.fxml;
+    opens co.edu.uniquindio.poo.amazen.Model.Persona to javafx.fxml;
+
     // Si usas AWT/Swing en algún sitio (opcional)
     requires java.desktop;
 
@@ -22,4 +28,5 @@ module co.edu.uniquindio.poo.amazen {
     exports co.edu.uniquindio.poo.amazen.ViewController;
     exports co.edu.uniquindio.poo.amazen.Model;
     exports co.edu.uniquindio.poo.amazen.Model.Persona;
+    exports co.edu.uniquindio.poo.amazen.Model.Strategy;
 }

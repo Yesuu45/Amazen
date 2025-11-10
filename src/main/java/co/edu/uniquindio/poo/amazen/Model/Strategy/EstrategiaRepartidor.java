@@ -6,6 +6,10 @@ public class EstrategiaRepartidor implements EstrategiaVista{
 
     @Override
     public void configurarVista(AmazenViewController controller) {
+        controller.mostrarBotonCatalogo(false);
+        controller.mostrarBotonCarrito(false);
+        controller.mostrarBotonHistorial(false);
+        controller.mostrarBotonEstado(true);
         controller.botonMisEnvios.setVisible(true);
         controller.botonMisEnvios.setDisable(false);
 

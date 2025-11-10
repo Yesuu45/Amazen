@@ -6,10 +6,10 @@ public class EstrategiaAdmin implements EstrategiaVista {
 
     @Override
     public void configurarVista(AmazenViewController controller) {
-        controller.botonCatalogo.setVisible(true);
-        controller.botonCarrito.setVisible(false);
-        controller.botonHistorial.setVisible(true);
-        controller.botonEstado.setVisible(true);
+        controller.mostrarBotonCatalogo(true);
+        controller.mostrarBotonCarrito(false);
+        controller.mostrarBotonHistorial(true);
+        controller.mostrarBotonEstado(true);
         controller.setBotonAdminVisible(true);
         controller.botonMisEnvios.setVisible(false);
         controller.botonMisEnvios.setDisable(false);
