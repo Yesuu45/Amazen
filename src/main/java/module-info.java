@@ -1,10 +1,12 @@
 module co.edu.uniquindio.poo.amazen {
+    // JavaFX
     requires javafx.controls;
     requires javafx.fxml;
-    requires javafx.base;
     requires javafx.graphics;
+    requires javafx.base;
+
+    // Lombok solo en compilación
     requires static lombok;
-    requires java.desktop;
 
     opens co.edu.uniquindio.poo.amazen to javafx.fxml;
     opens co.edu.uniquindio.poo.amazen.ViewController to javafx.fxml;
@@ -12,6 +14,16 @@ module co.edu.uniquindio.poo.amazen {
     opens co.edu.uniquindio.poo.amazen.Model.Strategy to javafx.fxml;
     opens co.edu.uniquindio.poo.amazen.Model.Persona to javafx.fxml;
 
+    // Si usas AWT/Swing en algún sitio (opcional)
+    requires java.desktop;
+
+    // Abre paquetes a FXML (carga de controladores y acceso por reflexión)
+    opens co.edu.uniquindio.poo.amazen to javafx.fxml;
+    opens co.edu.uniquindio.poo.amazen.ViewController to javafx.fxml;
+    opens co.edu.uniquindio.poo.amazen.Model to javafx.fxml;
+    opens co.edu.uniquindio.poo.amazen.Model.Persona to javafx.fxml;
+
+    // Exports si otras capas usan estas APIs
     exports co.edu.uniquindio.poo.amazen;
     exports co.edu.uniquindio.poo.amazen.ViewController;
     exports co.edu.uniquindio.poo.amazen.Model;

@@ -7,6 +7,8 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.Collections;
+
 
 @Getter
 @Setter
@@ -75,7 +77,9 @@ public class Amazen {
                 .email("repartidor1@amazen.com").telefono("1122334455")
                 .direccion("Calle 3 #3-03").celular("3001122334")
                 .documento("33333333").contrasena("repartidor123")
-                .ZonaCobertura("Norte").id(UUID.randomUUID())
+                .ZonaCobertura("Norte")
+                .disponibilidad(Disponibilidad.ACTIVO) // <--- NUEVO
+                .id(UUID.randomUUID())
                 .build();
 
         Repartidor repartidor2 = Repartidor.builder()
@@ -83,8 +87,11 @@ public class Amazen {
                 .email("repartidor2@amazen.com").telefono("2233445566")
                 .direccion("Calle 4 #4-04").celular("3002233445")
                 .documento("44444444").contrasena("repartidor456")
-                .ZonaCobertura("Sur").id(UUID.randomUUID())
+                .ZonaCobertura("Sur")
+                .disponibilidad(Disponibilidad.INACTIVO) // <--- NUEVO
+                .id(UUID.randomUUID())
                 .build();
+
 
         // Usuarios comunes (clientes)
         Usuario cliente1 = Usuario.builder()
@@ -113,4 +120,22 @@ public class Amazen {
 
         System.out.println("✅ Usuarios iniciales cargados correctamente en Amazen.");
     }
+
+    // === Delegaciones a HistorialPedido ===
+    public List<Pedido> getListaPedidos() {
+        // Si HistorialPedido ya expone su lista, úsala. Si no, te muestro abajo cómo crearla.
+        List<Pedido> base = historialPedido.getPedidos(); // <- método del historial (ver nota)
+        return base == null ? List.of() : Collections.unmodifiableList(base);
+    }
+
+    public void addPedido(Pedido p) {
+        if (p == null) throw new IllegalArgumentException("Pedido requerido");
+        historialPedido.agregarPedido(p);
+    }
+
+    public boolean removePedidoById(String id) {
+        if (id == null) return false;
+        return historialPedido.eliminarPedidoPorId(id);
+    }
+
 }

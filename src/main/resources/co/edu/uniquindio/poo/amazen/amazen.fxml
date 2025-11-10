@@ -60,6 +60,9 @@
                         text="Gestión Admin"
                         onAction="#irAGestionAdmin"
                         visible="false"  disable="true"/>
+
+                <Button fx:id="botonMisEnvios" text="Mis envíos" onAction="#irPanelRepartidor"/>
+
             </VBox>
 
         </VBox>

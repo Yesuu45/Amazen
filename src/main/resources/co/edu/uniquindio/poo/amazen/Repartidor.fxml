@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="co.edu.uniquindio.poo.amazen.ViewController.RepartidorViewController">
+
+    <top>
+        <HBox spacing="10">
+            <children>
+                <Label text="Panel del Repartidor"/>
+                <Separator orientation="VERTICAL"/>
+                <Label text="Disponibilidad:"/>
+                <ComboBox fx:id="cmbDisponibilidad" prefWidth="160"/>
+                <Button text="Guardar" onAction="#onGuardarDisponibilidad"/>
+                <Separator orientation="VERTICAL"/>
+                <Button text="Refrescar" onAction="#onRefrescar"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <Button text="Volver" onAction="#onVolver"/>
+                <Button text="Reportar incidencia" onAction="#onReportarIncidencia"/>
+                <Button text="Empaquetado" onAction="#onMarcarEmpaquetado"/>
+                <Button text="Enviado" onAction="#onMarcarEnviado"/>
+                <Button text="Entregado" onAction="#onMarcarEntregado"/>
+                <Button text="Exportar (TXT seleccionado)" onAction="#onExportarTxt"/>
+                <Button text="Exportar (CSV todos)" onAction="#onExportarCsv"/>
+
+            </children>
+            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+        </HBox>
+    </top>
+
+    <center>
+        <TableView fx:id="tblPedidos">
+            <columns>
+                <TableColumn fx:id="colId" text="ID" prefWidth="120"/>
+                <TableColumn fx:id="colEstado" text="Estado" prefWidth="120"/>
+                <TableColumn fx:id="colTotal" text="Total" prefWidth="100"/>
+                <TableColumn fx:id="colCreacion" text="Creación" prefWidth="160"/>
+                <TableColumn fx:id="colAsignacion" text="Asignación" prefWidth="160"/>
+                <TableColumn fx:id="colEntrega" text="Entrega" prefWidth="160"/>
+                <TableColumn fx:id="colIncidencias" text="# Incidencias" prefWidth="110"/>
+
+            </columns>
+        </TableView>
+    </center>
+
+    <bottom>
+        <Label fx:id="lblInfo" text="—" BorderPane.alignment="CENTER">
+            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+        </Label>
+    </bottom>
+</BorderPane>

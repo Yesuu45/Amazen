@@ -41,6 +41,16 @@ public class LoginViewController {
             abrirAmazen();
 
         } else {
+
+            // 🔹 Guardar el usuario logueado globalmente
+            co.edu.uniquindio.poo.amazen.Model.Persona.SesionUsuario
+                    .instancia().iniciarSesion(persona);
+
+            mostrarAlerta("Bienvenido", "Sesión iniciada correctamente para " + persona.getNombre(), Alert.AlertType.INFORMATION);
+            abrirVentanaPrincipal(persona);
+            ((Stage) buttonIngresar.getScene().getWindow()).close();
+        }
+        else {
             mostrarAlerta("Error", "Credenciales incorrectas. Verifique su ID o contraseña.", Alert.AlertType.ERROR);
         }
     }

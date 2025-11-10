@@ -20,6 +20,15 @@ public class AmazenViewController {
     @FXML private Button botonEstado;
     @FXML private Button botonAdmin;
     @FXML private Button botonCerrarSesion;
+    @FXML public Button botonCatalogo;
+    @FXML public Button botonCarrito;
+    @FXML public Button botonHistorial;
+    @FXML public Button botonEstado;
+    @FXML public Button botonMisEnvios;
+
+    // 👇 botón exclusivo de administradores
+    @FXML public Button botonAdmin;
+
     @FXML private Label tituloLabel;
 
     private EstrategiaVista estrategiaVista;
@@ -94,4 +103,22 @@ public class AmazenViewController {
             e.printStackTrace();
         }
     }
+    @FXML
+    private void irPanelRepartidor() {
+        final String FXML = "/co/edu/uniquindio/poo/amazen/repartidor.fxml";
+        try {
+            var loader = new javafx.fxml.FXMLLoader(getClass().getResource(FXML));
+            var scene  = new javafx.scene.Scene(loader.load());
+            var stage  = (javafx.stage.Stage) botonMisEnvios.getScene().getWindow();
+            stage.setScene(scene);
+            stage.setTitle("Panel del Repartidor");
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            var a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR,
+                    "No se pudo abrir el panel del repartidor", javafx.scene.control.ButtonType.OK);
+            a.setHeaderText("Error"); a.showAndWait();
+        }
+    }
+
 }

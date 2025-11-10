@@ -11,6 +11,8 @@ public class EstrategiaAdmin implements EstrategiaVista {
         controller.mostrarBotonHistorial(true);
         controller.mostrarBotonEstado(true);
         controller.setBotonAdminVisible(true);
+        controller.botonMisEnvios.setVisible(false);
+        controller.botonMisEnvios.setDisable(false);
 
         controller.actualizarTitulo("Panel Administrador - MercadoLibre");
     }
