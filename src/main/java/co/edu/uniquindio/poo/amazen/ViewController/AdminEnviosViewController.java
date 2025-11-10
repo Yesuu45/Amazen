@@ -192,5 +192,28 @@ public class AdminEnviosViewController {
             a.setHeaderText("Error"); a.showAndWait();
         }
     }
+    @FXML
+    private void onExportarCsv() {
+        try {
+            // 1) Mapear pedidos a DTOs (forzamos el tipo para evitar ambigüedad)
+            java.util.List<co.edu.uniquindio.poo.amazen.Model.DTO.PedidoDTO> dtos =
+                    tblPedidos.getItems().stream()
+                            .map((co.edu.uniquindio.poo.amazen.Model.Pedido p) ->
+                                    co.edu.uniquindio.poo.amazen.Model.DTO.DtoMapper.toDTO(p))
+                            .toList();
+
+            // 2) Ruta de salida
+            java.nio.file.Path out = java.nio.file.Paths.get("reportes", "pedidos_admin.csv");
+            java.nio.file.Files.createDirectories(out.getParent());
+
+            // 3) Exportar
+            co.edu.uniquindio.poo.amazen.Service.ExportCsvService.exportPedidos(out, dtos);
+
+            info("Exportación", "CSV generado en:\n" + out.toAbsolutePath());
+        } catch (Exception e) {
+            error("Exportación CSV", e.getMessage());
+        }
+    }
+
 
 }

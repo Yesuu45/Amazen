@@ -15,6 +15,7 @@
             <Button text="Asignar" onAction="#onAsignar"/>
             <Button text="Reasignar" onAction="#onReasignar"/>
             <Separator/>
+
             <MenuButton text="Cambiar estado">
                 <items>
                     <MenuItem text="Empaquetado" onAction="#onEstadoEmpaquetado"/>
@@ -22,6 +23,10 @@
                     <MenuItem text="Entregado" onAction="#onEstadoEntregado"/>
                 </items>
             </MenuButton>
+
+            <Button text="Exportar TXT" onAction="#onExportarTxt"/>
+            <Button text="Exportar CSV" onAction="#onExportarCsv"/>
+
             <Button text="Registrar incidencia" onAction="#onIncidencia"/>
         </ToolBar>
     </top>

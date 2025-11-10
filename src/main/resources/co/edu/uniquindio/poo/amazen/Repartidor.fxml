@@ -24,6 +24,9 @@
                 <Button text="Empaquetado" onAction="#onMarcarEmpaquetado"/>
                 <Button text="Enviado" onAction="#onMarcarEnviado"/>
                 <Button text="Entregado" onAction="#onMarcarEntregado"/>
+                <Button text="Exportar (TXT seleccionado)" onAction="#onExportarTxt"/>
+                <Button text="Exportar (CSV todos)" onAction="#onExportarCsv"/>
+
             </children>
             <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
         </HBox>

@@ -1,40 +1,28 @@
 package co.edu.uniquindio.poo.amazen.Model;
 
-import java.io.File;
-import java.io.FileWriter;
+import co.edu.uniquindio.poo.amazen.Model.DTO.DtoMapper;
+import co.edu.uniquindio.poo.amazen.Model.DTO.PedidoTicketDTO;
+import co.edu.uniquindio.poo.amazen.Service.ExportTxtService;
+
 import java.io.IOException;
-import java.util.List;
+import java.nio.file.Path;
 
+/**
+ * Clase usada por compatibilidad para el trabajo.
+ * Internamente usa DTOs y un servicio de exportación.
+ */
 public class ExportarArchivo {
+
+    /**
+     * Exporta un pedido a TXT.
+     * Mantiene la firma original para no romper llamadas existentes.
+     */
     public static void exportarPedido(Pedido pedido, String rutaArchivoTxt) throws IOException {
-        // Asegurar carpeta existente
-        File archivo = new File(rutaArchivoTxt);
-        File carpeta = archivo.getParentFile();
-        if (carpeta != null && !carpeta.exists()) {
-            carpeta.mkdirs();
-        }
+        if (pedido == null) throw new IllegalArgumentException("Pedido requerido");
+        if (rutaArchivoTxt == null || rutaArchivoTxt.isBlank())
+            throw new IllegalArgumentException("Ruta inválida");
 
-        FileWriter writer = new FileWriter(archivo);
-        writer.write("=========================================\n");
-        writer.write("            DETALLE DEL PEDIDO\n");
-        writer.write("=========================================\n");
-        writer.write("ID Pedido: " + pedido.getId() + "\n");
-        writer.write("Estado: " + pedido.getEstado() + "\n\n");
-
-        writer.write(String.format("%-25s %8s %12s\n", "Producto", "Cantidad", "Subtotal"));
-        writer.write("-----------------------------------------\n");
-
-        List<DetallePedido> detalles = pedido.getCarrito().getDetalles();
-        for (int i = 0; i < detalles.size(); i++) {
-            DetallePedido d = detalles.get(i);
-            String nombre = d.getProducto().getNombre();
-            int cantidad = d.getCantidad();
-            double subtotal = d.getSubtotal();
-            writer.write(String.format("%-25s %8d %12.2f\n", nombre, cantidad, subtotal));
-        }
-
-        writer.write("-----------------------------------------\n");
-        writer.write(String.format("TOTAL: %.2f\n", pedido.calcularTotal()));
-        writer.close();
+        PedidoTicketDTO dto = DtoMapper.toTicketDTO(pedido);
+        ExportTxtService.exportarPedido(Path.of(rutaArchivoTxt), dto);
     }
 }

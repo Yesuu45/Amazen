@@ -529,5 +529,34 @@ public class AdministradorViewController {
             a.setHeaderText("Error"); a.showAndWait();
         }
     }
+    @FXML
+    private void onExportarTxt() {
+        var sel = tblPedidos.getSelectionModel().getSelectedItem();
+        if (sel == null) { error("Selección", "Elige un pedido."); return; }
+        try {
+            co.edu.uniquindio.poo.amazen.Model.ExportarArchivo
+                    .exportarPedido(sel, "reportes/pedido_" + sel.getId() + ".txt");
+            info("Exportación", "Se generó el TXT en reportes/pedido_" + sel.getId() + ".txt");
+        } catch (Exception e) {
+            error("Exportación TXT", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void onExportarCsv() {
+        try {
+            var pedidos = tblPedidos.getItems(); // o HistorialPedido.getInstance().obtenerPedidos()
+            var dtos = pedidos.stream()
+                    .map(co.edu.uniquindio.poo.amazen.Model.DTO.DtoMapper::toDTO)
+                    .toList();
+            java.nio.file.Path out = java.nio.file.Paths.get("reportes", "pedidos.csv");
+            java.nio.file.Files.createDirectories(out.getParent());
+            co.edu.uniquindio.poo.amazen.Service.ExportCsvService.exportPedidos(out, dtos);
+            info("Exportación", "CSV generado en: " + out.toAbsolutePath());
+        } catch (Exception e) {
+            error("Exportación CSV", e.getMessage());
+        }
+    }
+
 
 }
