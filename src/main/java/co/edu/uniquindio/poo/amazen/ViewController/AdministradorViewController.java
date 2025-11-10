@@ -15,7 +15,6 @@ import co.edu.uniquindio.poo.amazen.Model.Strategy.EstrategiaVista;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -138,7 +137,7 @@ public class AdministradorViewController {
                 txtDocumento.setEditable(false);
                 setDisponibilidadSection(true, rep);
                 setZonaVisible(true);
-                txtZona.setText(nvl(rep.getZonaCobertura()));     // asumiendo getZona() existe
+                txtZona.setText(nvl(rep.getZonaCobertura()));
 
             } else { // Usuario
                 cmbRol.setValue("Usuario");
@@ -170,7 +169,7 @@ public class AdministradorViewController {
         setCrudEnabled(true);
     }
 
-    // ======= Acciones =======
+    // ======= Acciones CRUD/LOGIN =======
 
     @FXML
     private void onCrear() {
@@ -348,7 +347,7 @@ public class AdministradorViewController {
         else error("Login fallido", "Credenciales inválidas.");
     }
 
-    // ======= Cambiar disponibilidad (Repartidor) =======
+    // ======= Disponibilidad (Repartidor) =======
     @FXML
     private void onCambiarDisponibilidad() {
         var seleccionado = tblPersonas.getSelectionModel().getSelectedItem();
@@ -370,8 +369,77 @@ public class AdministradorViewController {
         }
     }
 
-    // ======= Helpers =======
+    // ======= Navegación =======
+    @FXML
+    private void onVolver() {
+        final String FXML_AMAZEN = "/co/edu/uniquindio/poo/amazen/amazen.fxml";
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_AMAZEN));
+            Scene scene = new Scene(loader.load());
 
+            AmazenViewController avc = loader.getController();
+            Persona persona = SesionUsuario.instancia().getPersona();
+            EstrategiaVista estrategia = estrategiaPara(persona);
+            avc.setEstrategiaVista(estrategia);
+
+            Stage stage = (Stage) botonVolver.getScene().getWindow();
+            stage.setScene(scene);
+            stage.setTitle("Amazen");
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            mostrarAlerta("Error", "No se pudo volver a la pantalla principal.");
+        }
+    }
+
+    private EstrategiaVista estrategiaPara(Persona persona) {
+        if (persona instanceof Administrador) return new EstrategiaAdmin();
+        else if (persona instanceof Repartidor) return new EstrategiaRepartidor();
+        else return new EsteategiaUsuario();
+    }
+
+    private void mostrarAlerta(String titulo, String msg) {
+        Alert a = new Alert(Alert.AlertType.WARNING);
+        a.setTitle(titulo); a.setHeaderText(null); a.setContentText(msg);
+        a.showAndWait();
+    }
+
+    @FXML
+    private void onAbrirEnvios() {
+        final String FXML = "/co/edu/uniquindio/poo/amazen/admin_envios.fxml";
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML));
+            Scene scene = new Scene(loader.load());
+            Stage stage = new Stage();
+            stage.setTitle("Gestión de Envíos (Asignación, Estados, Incidencias)");
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            Alert a = new Alert(Alert.AlertType.ERROR, "No se pudo abrir la vista de envíos", ButtonType.OK);
+            a.setHeaderText("Error"); a.showAndWait();
+        }
+    }
+
+    @FXML
+    private void onAbrirDashboard() {
+        final String FXML = "/co/edu/uniquindio/poo/amazen/admin_dashboard.fxml";
+        try {
+            var loader = new javafx.fxml.FXMLLoader(getClass().getResource(FXML));
+            var scene = new javafx.scene.Scene(loader.load());
+            var stage = new javafx.stage.Stage();
+            stage.setTitle("Panel de Métricas");
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            var a = new Alert(Alert.AlertType.ERROR, "No se pudo abrir el panel de métricas", ButtonType.OK);
+            a.setHeaderText("Error"); a.showAndWait();
+        }
+    }
+
+    // ======= Helpers =======
     private void setCrudEnabled(boolean enabled) {
         btnCrear.setDisable(!enabled);
         btnActualizar.setDisable(!enabled);
@@ -460,103 +528,4 @@ public class AdministradorViewController {
         var result = alert.showAndWait();
         return result.isPresent() && result.get() == ButtonType.YES;
     }
-
-    @FXML
-    private void onVolver() {
-        final String FXML_AMAZEN = "/co/edu/uniquindio/poo/amazen/amazen.fxml";
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_AMAZEN));
-            Scene scene = new Scene(loader.load());
-
-            AmazenViewController avc = loader.getController();
-            Persona persona = SesionUsuario.instancia().getPersona();
-            EstrategiaVista estrategia = estrategiaPara(persona);
-            avc.setEstrategiaVista(estrategia);
-
-            Stage stage = (Stage) botonVolver.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle("Amazen");
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            mostrarAlerta("Error", "No se pudo volver a la pantalla principal.");
-        }
-    }
-
-    private EstrategiaVista estrategiaPara(Persona persona) {
-        if (persona instanceof Administrador) return new EstrategiaAdmin();
-        else if (persona instanceof Repartidor) return new EstrategiaRepartidor();
-        else return new EsteategiaUsuario();
-    }
-
-    private void mostrarAlerta(String titulo, String msg) {
-        Alert a = new Alert(Alert.AlertType.WARNING);
-        a.setTitle(titulo); a.setHeaderText(null); a.setContentText(msg);
-        a.showAndWait();
-    }
-
-    @FXML
-    private void onAbrirEnvios(ActionEvent e) {
-        final String FXML = "/co/edu/uniquindio/poo/amazen/admin_envios.fxml";
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML));
-            Scene scene = new Scene(loader.load());
-            Stage stage = new Stage();
-            stage.setTitle("Gestión de Envíos (Asignación, Estados, Incidencias)");
-            stage.setScene(scene);
-            stage.show();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            Alert a = new Alert(Alert.AlertType.ERROR, "No se pudo abrir la vista de envíos", ButtonType.OK);
-            a.setHeaderText("Error"); a.showAndWait();
-        }
-    }
-
-    @FXML
-    private void onAbrirDashboard() {
-        final String FXML = "/co/edu/uniquindio/poo/amazen/admin_dashboard.fxml";
-        try {
-            var loader = new javafx.fxml.FXMLLoader(getClass().getResource(FXML));
-            var scene = new javafx.scene.Scene(loader.load());
-            var stage = new javafx.stage.Stage();
-            stage.setTitle("Panel de Métricas");
-            stage.setScene(scene);
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-            var a = new Alert(Alert.AlertType.ERROR, "No se pudo abrir el panel de métricas", ButtonType.OK);
-            a.setHeaderText("Error"); a.showAndWait();
-        }
-    }
-    @FXML
-    private void onExportarTxt() {
-        var sel = tblPedidos.getSelectionModel().getSelectedItem();
-        if (sel == null) { error("Selección", "Elige un pedido."); return; }
-        try {
-            co.edu.uniquindio.poo.amazen.Model.ExportarArchivo
-                    .exportarPedido(sel, "reportes/pedido_" + sel.getId() + ".txt");
-            info("Exportación", "Se generó el TXT en reportes/pedido_" + sel.getId() + ".txt");
-        } catch (Exception e) {
-            error("Exportación TXT", e.getMessage());
-        }
-    }
-
-    @FXML
-    private void onExportarCsv() {
-        try {
-            var pedidos = tblPedidos.getItems(); // o HistorialPedido.getInstance().obtenerPedidos()
-            var dtos = pedidos.stream()
-                    .map(co.edu.uniquindio.poo.amazen.Model.DTO.DtoMapper::toDTO)
-                    .toList();
-            java.nio.file.Path out = java.nio.file.Paths.get("reportes", "pedidos.csv");
-            java.nio.file.Files.createDirectories(out.getParent());
-            co.edu.uniquindio.poo.amazen.Service.ExportCsvService.exportPedidos(out, dtos);
-            info("Exportación", "CSV generado en: " + out.toAbsolutePath());
-        } catch (Exception e) {
-            error("Exportación CSV", e.getMessage());
-        }
-    }
-
-
 }

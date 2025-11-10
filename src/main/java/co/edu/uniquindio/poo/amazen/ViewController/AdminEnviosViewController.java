@@ -1,219 +1,314 @@
 package co.edu.uniquindio.poo.amazen.ViewController;
 
-import co.edu.uniquindio.poo.amazen.Model.HistorialPedido;
-import co.edu.uniquindio.poo.amazen.Controller.GestorEstadosController;
-import co.edu.uniquindio.poo.amazen.Controller.GestorPedidosController;
 import co.edu.uniquindio.poo.amazen.Model.Amazen;
-import co.edu.uniquindio.poo.amazen.Model.Incidencia;
 import co.edu.uniquindio.poo.amazen.Model.Pedido;
-import co.edu.uniquindio.poo.amazen.Model.Persona.Persona;
 import co.edu.uniquindio.poo.amazen.Model.Persona.Repartidor;
+import co.edu.uniquindio.poo.amazen.Model.DTO.DtoMapper;
+import co.edu.uniquindio.poo.amazen.Service.ExportCsvService;
+import co.edu.uniquindio.poo.amazen.Model.ExportarArchivo;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AdminEnviosViewController {
 
+    // Toolbar
+    @FXML private Button btnRefrescar;
+    @FXML private ComboBox<Repartidor> cmbRepartidores;
+
+    // Tabla
     @FXML private TableView<Pedido> tblPedidos;
     @FXML private TableColumn<Pedido, String> colId;
     @FXML private TableColumn<Pedido, String> colEstado;
     @FXML private TableColumn<Pedido, String> colRepartidor;
-    @FXML private TableColumn<Pedido, String> colTotal;
+    @FXML private TableColumn<Pedido, Number> colTotal;
     @FXML private TableColumn<Pedido, String> colCreacion;
     @FXML private TableColumn<Pedido, String> colAsignacion;
     @FXML private TableColumn<Pedido, String> colEntrega;
-    @FXML private TableColumn<Pedido, String> colIncidencias;
+    @FXML private TableColumn<Pedido, Number> colIncidencias;
 
-    @FXML private ComboBox<String> cmbRepartidores;
+    // Bottom
     @FXML private Label lblInfo;
 
-    private final ObservableList<Pedido> pedidosView = FXCollections.observableArrayList();
-
-    // Controladores de negocio
-    private final GestorPedidosController gestorPedidos = new GestorPedidosController();
-    private final GestorEstadosController gestorEstados = new GestorEstadosController();
-
-    private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    private final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     @FXML
     public void initialize() {
-        // Configurar columnas
-        colId.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getId()));
-        colEstado.setCellValueFactory(c -> new SimpleStringProperty(
-                c.getValue().getEstado() == null ? "—" : c.getValue().getEstado().toString()
-        ));
-        colRepartidor.setCellValueFactory(c -> new SimpleStringProperty(
-                c.getValue().getDocumentoRepartidorAsignado() == null ? "—" : c.getValue().getDocumentoRepartidorAsignado()
-        ));
-        colTotal.setCellValueFactory(c -> new SimpleStringProperty(String.format("$ %.2f", c.getValue().calcularTotal())));
-        colCreacion.setCellValueFactory(c -> new SimpleStringProperty(
-                c.getValue().getFechaCreacion() == null ? "—" : FMT.format(c.getValue().getFechaCreacion())
-        ));
-        colAsignacion.setCellValueFactory(c -> new SimpleStringProperty(
-                c.getValue().getFechaAsignacion() == null ? "—" : FMT.format(c.getValue().getFechaAsignacion())
-        ));
-        colEntrega.setCellValueFactory(c -> new SimpleStringProperty(
-                c.getValue().getFechaEntrega() == null ? "—" : FMT.format(c.getValue().getFechaEntrega())
-        ));
-        colIncidencias.setCellValueFactory(c -> new SimpleStringProperty(
-                String.valueOf(c.getValue().getIncidencias() == null ? 0 : c.getValue().getIncidencias().size())
-        ));
+        // ==== columnas ====
+        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-        // Cargar datos iniciales
+        colEstado.setCellValueFactory(c -> {
+            var est = c.getValue().getEstado();
+            return new SimpleStringProperty(est == null ? "—" : est.toString());
+        });
+
+        colRepartidor.setCellValueFactory(c ->
+                new SimpleStringProperty(
+                        c.getValue().getDocumentoRepartidorAsignado() == null ? "—" : c.getValue().getDocumentoRepartidorAsignado()
+                )
+        );
+
+        colTotal.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().calcularTotal()));
+
+        colCreacion.setCellValueFactory(c -> new SimpleStringProperty(format(c.getValue().getFechaCreacion())));
+        colAsignacion.setCellValueFactory(c -> new SimpleStringProperty(format(c.getValue().getFechaAsignacion())));
+        colEntrega.setCellValueFactory(c -> new SimpleStringProperty(format(c.getValue().getFechaEntrega())));
+
+        colIncidencias.setCellValueFactory(c -> {
+            int n = 0;
+            try { n = c.getValue().getIncidencias() == null ? 0 : c.getValue().getIncidencias().size(); }
+            catch (Throwable ignore) {}
+            return new ReadOnlyObjectWrapper<>(n);
+        });
+
+        // ==== datos ====
         cargarRepartidores();
         cargarPedidos();
+
+        // UX
+        tblPedidos.setPlaceholder(new Label("No hay pedidos para mostrar"));
+        setInfo("Listo.");
     }
 
-    private void cargarRepartidores() {
-        cmbRepartidores.getItems().clear();
-        Amazen.getInstance().getListaPersonas().stream()
-                .filter(p -> p instanceof Repartidor)
-                .map(Persona::getDocumento)
-                .forEach(doc -> cmbRepartidores.getItems().add(doc));
-    }
-
-
-    private void cargarPedidos() {
-        pedidosView.setAll(HistorialPedido.getInstance().obtenerPedidos()); // <- AQUÍ el cambio
-        tblPedidos.setItems(pedidosView);
-        tblPedidos.setPlaceholder(new Label("No hay pedidos. Crea alguno desde el flujo de compra."));
-        lblInfo.setText("Pedidos cargados: " + pedidosView.size());
-    }
-    // === Botones ===
+    // ====== acciones toolbar ======
 
     @FXML
     private void onRefrescar() {
         cargarRepartidores();
         cargarPedidos();
-        info("Refrescar", "Datos actualizados.");
+        setInfo("Refrescado.");
     }
 
     @FXML
     private void onAsignar() {
-        Pedido sel = tblPedidos.getSelectionModel().getSelectedItem();
-        String docRep = cmbRepartidores.getValue();
-        if (sel == null) { error("Seleccione un pedido", "Elija un pedido en la tabla."); return; }
-        if (docRep == null || docRep.isBlank()) { error("Seleccione un repartidor", "Elija un documento de repartidor."); return; }
-
-        sel.asignarRepartidor(docRep);                     // ✅ usa tu método del modelo
-        tblPedidos.refresh();
-        info("Asignado", "Repartidor asignado al pedido " + sel.getId());
+        var sel = seleccionado();
+        if (sel == null) return;
+        var rep = cmbRepartidores.getValue();
+        if (rep == null) { warn("Selecciona un repartidor."); return; }
+        try {
+            sel.asignarRepartidor(rep.getDocumento());
+            tblPedidos.refresh();
+            setInfo("Asignado repartidor " + rep.getDocumento() + " a " + sel.getId());
+        } catch (Exception e) {
+            error("No se pudo asignar: " + e.getMessage());
+        }
     }
+
     @FXML
     private void onReasignar() {
-        Pedido sel = tblPedidos.getSelectionModel().getSelectedItem();
-        String docRep = cmbRepartidores.getValue();
-        if (sel == null) { error("Seleccione un pedido", "Elija un pedido en la tabla."); return; }
-        if (docRep == null || docRep.isBlank()) { error("Seleccione un repartidor", "Elija un documento de repartidor."); return; }
-
-        sel.asignarRepartidor(docRep);                     // ✅ mismo método (reasigna y marca fecha)
-        tblPedidos.refresh();
-        info("Reasignado", "Repartidor reasignado al pedido " + sel.getId());
+        onAsignar();
     }
 
-    @FXML private void onEstadoEmpaquetado() { cambiarEstado("empaquetado"); }
-    @FXML private void onEstadoEnviado()     { cambiarEstado("enviado"); }
-    @FXML private void onEstadoEntregado()   { cambiarEstado("entregado"); }
+    @FXML
+    private void onEstadoEmpaquetado() {
+        var sel = seleccionado();
+        if (sel == null) return;
+        try {
+            sel.empaquetar(); // usa tu State
+            tblPedidos.refresh();
+            setInfo("Pedido " + sel.getId() + " → Empaquetado");
+        } catch (Exception e) {
+            error("No se pudo cambiar estado: " + e.getMessage());
+        }
+    }
 
-    private void cambiarEstado(String accion) {
-        Pedido sel = tblPedidos.getSelectionModel().getSelectedItem();
-        if (sel == null) { error("Seleccione un pedido", "Elija un pedido en la tabla."); return; }
+    @FXML
+    private void onEstadoEnviado() {
+        var sel = seleccionado();
+        if (sel == null) return;
+        try {
+            sel.enviar();
+            tblPedidos.refresh();
+            setInfo("Pedido " + sel.getId() + " → Enviado");
+        } catch (Exception e) {
+            error("No se pudo cambiar estado: " + e.getMessage());
+        }
+    }
 
-        gestorEstados.setPedido(sel);
-        if (gestorEstados.cambiarEstado(accion)) {
-            tblPedidos.refresh();                          // ✅ refresca columnas Estado/Entrega
-            info("Estado actualizado", "Se aplicó: " + accion.toUpperCase());
+    @FXML
+    private void onEstadoEntregado() {
+        var sel = seleccionado();
+        if (sel == null) return;
+        try {
+            sel.entregar();
+            tblPedidos.refresh();
+            setInfo("Pedido " + sel.getId() + " → Entregado");
+        } catch (Exception e) {
+            error("No se pudo cambiar estado: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void onExportarTxt() {
+        var sel = seleccionado();
+        if (sel == null) return;
+        try {
+            Path out = Path.of("reportes", "pedido_" + sel.getId() + ".txt");
+            Files.createDirectories(out.getParent());
+            ExportarArchivo.exportarPedido(sel, out.toString());
+            info("TXT generado en:\n" + out.toAbsolutePath());
+        } catch (Exception e) {
+            error("Exportación TXT: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void onExportarCsv() {
+        try {
+            var pedidos = tblPedidos.getItems();
+            var dtos = pedidos.stream()
+                    .map((Pedido p) -> DtoMapper.toDTO(p))  // evita ambigüedad con DetallePedido
+                    .toList();
+
+            Path out = Path.of("reportes", "pedidos.csv");
+            Files.createDirectories(out.getParent());
+            ExportCsvService.exportPedidos(out, dtos);
+            info("CSV generado en:\n" + out.toAbsolutePath());
+        } catch (Exception e) {
+            error("Exportación CSV: " + e.getMessage());
         }
     }
 
     @FXML
     private void onIncidencia() {
-        Pedido sel = tblPedidos.getSelectionModel().getSelectedItem();
-        if (sel == null) { error("Seleccione un pedido", "Elija un pedido en la tabla."); return; }
+        var sel = seleccionado();
+        if (sel == null) return;
 
-        TextInputDialog dZona = new TextInputDialog();
-        dZona.setHeaderText("Zona de la incidencia");
-        dZona.setContentText("Zona:");
-        String zona = dZona.showAndWait().orElse(null);
-        if (zona == null) return;
+        TextInputDialog d = new TextInputDialog();
+        d.setHeaderText("Registrar incidencia");
+        d.setContentText("Describe la incidencia:");
+        var txt = d.showAndWait().orElse(null);
+        if (txt == null || txt.isBlank()) return;
 
-        TextInputDialog dTipo = new TextInputDialog();
-        dTipo.setHeaderText("Tipo de incidencia");
-        dTipo.setContentText("Tipo:");
-        String tipo = dTipo.showAndWait().orElse(null);
-        if (tipo == null) return;
+        try {
+            // Intentamos construir co.edu.uniquindio.poo.amazen.Model.Incidencia(String, LocalDateTime)
+            // Si tu clase Incidencia tiene otra firma, ajústala o captura y notifica.
+            Object inc;
+            try {
+                var clazz = Class.forName("co.edu.uniquindio.poo.amazen.Model.Incidencia");
+                try {
+                    var ctor = clazz.getConstructor(String.class, LocalDateTime.class);
+                    inc = ctor.newInstance(txt.trim(), LocalDateTime.now());
+                } catch (NoSuchMethodException ex) {
+                    var ctor2 = clazz.getConstructor(String.class);
+                    inc = ctor2.newInstance(txt.trim());
+                }
+            } catch (Exception reflect) {
+                error("No se pudo crear la incidencia. Ajusta el constructor de Incidencia (String [, LocalDateTime]).");
+                return;
+            }
 
-        TextInputDialog dDet = new TextInputDialog();
-        dDet.setHeaderText("Detalle de la incidencia");
-        dDet.setContentText("Detalle:");
-        String detalle = dDet.showAndWait().orElse(null);
-        if (detalle == null) return;
-
-        sel.registrarIncidencia(new Incidencia(zona, tipo, detalle)); // ✅ tu API del modelo
-        tblPedidos.refresh();
-        info("Incidencia registrada", "Quedó asociada al pedido " + sel.getId());
+            // Llama a registrarIncidencia(Incidencia)
+            sel.registrarIncidencia((co.edu.uniquindio.poo.amazen.Model.Incidencia) inc);
+            tblPedidos.refresh();
+            setInfo("Incidencia registrada para " + sel.getId());
+        } catch (Exception e) {
+            error("No se pudo registrar la incidencia: " + e.getMessage());
+        }
     }
-
 
     @FXML
     private void onCerrar() {
-        Stage st = (Stage) tblPedidos.getScene().getWindow();
+        Stage st = (Stage) ((Node) lblInfo).getScene().getWindow();
         st.close();
     }
 
-    // === Helpers ===
-    private void info(String t, String c) {
-        Alert a = new Alert(Alert.AlertType.INFORMATION, c, ButtonType.OK);
-        a.setHeaderText(t); a.showAndWait();
-    }
-    private void error(String t, String c) {
-        Alert a = new Alert(Alert.AlertType.ERROR, c, ButtonType.OK);
-        a.setHeaderText(t); a.showAndWait();
-    }
-    @FXML
-    private void onAbrirEnvios() {
-        final String FXML = "/co/edu/uniquindio/poo/amazen/admin_envios.fxml";
+    // ====== util ======
+
+    private void cargarPedidos() {
+        List<Pedido> pedidos;
         try {
-            var loader = new javafx.fxml.FXMLLoader(getClass().getResource(FXML));
-            var scene = new javafx.scene.Scene(loader.load());
-            var stage = new javafx.stage.Stage();
-            stage.setTitle("Gestión de Envíos (Asignación, Estados, Incidencias)");
-            stage.setScene(scene);
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-            Alert a = new Alert(Alert.AlertType.ERROR, "No se pudo abrir la vista de envíos", ButtonType.OK);
-            a.setHeaderText("Error"); a.showAndWait();
+            pedidos = Amazen.getInstance().getListaPedidos();
+        } catch (Throwable t) {
+            pedidos = List.of();
+        }
+        // orden opcional: recientes primero
+        pedidos = pedidos.stream()
+                .sorted(Comparator.comparing(Pedido::getFechaCreacion,
+                        Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+                .collect(Collectors.toList());
+
+        tblPedidos.setItems(FXCollections.observableArrayList(pedidos));
+        tblPedidos.refresh();
+    }
+
+    private void cargarRepartidores() {
+        try {
+            var personas = Amazen.getInstance().getListaPersonas();
+            var reps = personas.stream()
+                    .filter(p -> p instanceof Repartidor)
+                    .map(p -> (Repartidor) p)
+                    .sorted(Comparator.comparing(Repartidor::getDocumento))
+                    .toList();
+
+            cmbRepartidores.setItems(FXCollections.observableArrayList(reps));
+            // cell factory para mostrar Nombre Apellido (doc)
+            cmbRepartidores.setButtonCell(new ListCell<>() {
+                @Override protected void updateItem(Repartidor item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty || item == null ? "" : labelRep(item));
+                }
+            });
+            cmbRepartidores.setCellFactory(list -> new ListCell<>() {
+                @Override protected void updateItem(Repartidor item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty || item == null ? "" : labelRep(item));
+                }
+            });
+        } catch (Throwable t) {
+            cmbRepartidores.setItems(FXCollections.observableArrayList());
         }
     }
-    @FXML
-    private void onExportarCsv() {
-        try {
-            // 1) Mapear pedidos a DTOs (forzamos el tipo para evitar ambigüedad)
-            java.util.List<co.edu.uniquindio.poo.amazen.Model.DTO.PedidoDTO> dtos =
-                    tblPedidos.getItems().stream()
-                            .map((co.edu.uniquindio.poo.amazen.Model.Pedido p) ->
-                                    co.edu.uniquindio.poo.amazen.Model.DTO.DtoMapper.toDTO(p))
-                            .toList();
 
-            // 2) Ruta de salida
-            java.nio.file.Path out = java.nio.file.Paths.get("reportes", "pedidos_admin.csv");
-            java.nio.file.Files.createDirectories(out.getParent());
-
-            // 3) Exportar
-            co.edu.uniquindio.poo.amazen.Service.ExportCsvService.exportPedidos(out, dtos);
-
-            info("Exportación", "CSV generado en:\n" + out.toAbsolutePath());
-        } catch (Exception e) {
-            error("Exportación CSV", e.getMessage());
-        }
+    private String labelRep(Repartidor r) {
+        String nom = r.getNombre() == null ? "" : r.getNombre();
+        String ape = r.getApellido() == null ? "" : r.getApellido();
+        String doc = r.getDocumento() == null ? "—" : r.getDocumento();
+        return (nom + " " + ape + " (" + doc + ")").trim();
     }
 
+    private Pedido seleccionado() {
+        var sel = tblPedidos.getSelectionModel().getSelectedItem();
+        if (sel == null) warn("Selecciona un pedido de la tabla.");
+        return sel;
+    }
 
+    private String format(LocalDateTime dt) {
+        return dt == null ? "" : FMT.format(dt);
+    }
+
+    private void setInfo(String msg) {
+        if (lblInfo != null) lblInfo.setText(msg);
+    }
+
+    private void info(String msg) {
+        alert(Alert.AlertType.INFORMATION, "Información", msg);
+    }
+
+    private void warn(String msg) {
+        alert(Alert.AlertType.WARNING, "Atención", msg);
+    }
+
+    private void error(String msg) {
+        alert(Alert.AlertType.ERROR, "Error", msg);
+    }
+
+    private void alert(Alert.AlertType t, String header, String msg) {
+        var a = new Alert(t, msg, ButtonType.OK);
+        a.setHeaderText(header);
+        a.showAndWait();
+    }
 }

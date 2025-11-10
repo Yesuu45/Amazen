@@ -88,7 +88,6 @@
         <VBox spacing="8">
             <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
 
-            <!-- Botonera CRUD -->
             <HBox spacing="10">
                 <Button fx:id="btnCrear" text="Crear" onAction="#onCrear"/>
                 <Button fx:id="btnActualizar" text="Actualizar" onAction="#onActualizar"/>
@@ -98,11 +97,8 @@
                 <Button fx:id="botonVolver" text="Volver" onAction="#onVolver"/>
                 <Button text="Gestionar Envíos" onAction="#onAbrirEnvios"/>
                 <Button text="Panel de Métricas" onAction="#onAbrirDashboard"/>
-
-
             </HBox>
 
-            <!-- Sección SOLO para Repartidor -->
             <HBox fx:id="hbxDisponibilidad" spacing="10" visible="false" managed="false">
                 <Label text="Disponibilidad:"/>
                 <ComboBox fx:id="cmbDisponibilidad" prefWidth="150"/>

@@ -26,4 +26,19 @@ public class HistorialPedido {
         return pedidos;
     }
 
+    public List<Pedido> getPedidos() {
+        // alias de obtenerPedidos()
+        return obtenerPedidos();
+    }
+
+    public void agregarPedido(Pedido pedido) {
+        // alias de registrarPedido()
+        registrarPedido(pedido);
+    }
+
+    public boolean eliminarPedidoPorId(String id) {
+        if (id == null) return false;
+        return pedidos.removeIf(p -> id.equals(p.getId()));
+    }
+
 }

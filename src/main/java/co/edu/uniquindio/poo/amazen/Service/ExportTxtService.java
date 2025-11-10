@@ -1,5 +1,6 @@
 package co.edu.uniquindio.poo.amazen.Service;
 
+import co.edu.uniquindio.poo.amazen.Model.DTO.PedidoTicketDTO;
 import co.edu.uniquindio.poo.amazen.Model.Pedido;
 
 import java.io.IOException;
@@ -34,5 +35,8 @@ public class ExportTxtService {
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
         return out;
+    }
+
+    public static void exportarPedido(Path of, PedidoTicketDTO dto) {
     }
 }

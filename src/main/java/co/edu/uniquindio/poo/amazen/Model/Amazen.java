@@ -7,6 +7,8 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.Collections;
+
 
 @Getter
 @Setter
@@ -118,4 +120,22 @@ public class Amazen {
 
         System.out.println("✅ Usuarios iniciales cargados correctamente en Amazen.");
     }
+
+    // === Delegaciones a HistorialPedido ===
+    public List<Pedido> getListaPedidos() {
+        // Si HistorialPedido ya expone su lista, úsala. Si no, te muestro abajo cómo crearla.
+        List<Pedido> base = historialPedido.getPedidos(); // <- método del historial (ver nota)
+        return base == null ? List.of() : Collections.unmodifiableList(base);
+    }
+
+    public void addPedido(Pedido p) {
+        if (p == null) throw new IllegalArgumentException("Pedido requerido");
+        historialPedido.agregarPedido(p);
+    }
+
+    public boolean removePedidoById(String id) {
+        if (id == null) return false;
+        return historialPedido.eliminarPedidoPorId(id);
+    }
+
 }
