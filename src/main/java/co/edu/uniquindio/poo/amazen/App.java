@@ -16,33 +16,36 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
- * Versión con datos DEMO seguros.
+ * App principal con datos DEMO “seguros”.
  * - Si algo del demo falla, lo registra en consola y la app igual arranca.
- * - No usa clases opcionales (Incidencia, fechas, etc.).
+ * - Genera personas (admin/usuario/repartidores) y 8 pedidos con estados variados.
+ * - Asigna automáticamente algunos pedidos y registra incidencias si existe la clase Incidencia.
  */
 public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        cargarDatosDemoSeguro(); // no detiene el arranque si falla
+        // Carga de datos quemados (no bloquea el arranque si algo falla):
+        cargarDatosDemoSeguro();
 
         final String fxml = "/co/edu/uniquindio/poo/amazen/login.fxml";
         FXMLLoader loader = new FXMLLoader(App.class.getResource(fxml));
         Scene scene = new Scene(loader.load(), 700, 500);
+
         primaryStage.setTitle("Login");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
     /**
-     * Inserta datos "quemados" mínimos (personas + pedidos simples).
-     * Todo dentro de try/catch para no bloquear la app si algo no existe.
+     * Inserta datos de demostración (personas + pedidos).
+     * Todo el bloque va en try/catch para evitar que un fallo de demo impida abrir la app.
      */
     private void cargarDatosDemoSeguro() {
         try {
             Amazen sistema = Amazen.getInstance();
 
-            // ===== Personas =====
+            // ===== Personas DEMO =====
             Administrador admin = Administrador.builder()
                     .nombre("Laura").apellido("Ríos").email("admin@demo.com")
                     .telefono("111111").direccion("Oficina Central")
@@ -72,26 +75,43 @@ public class App extends Application {
             sistema.getListaPersonas().add(rep1);
             sistema.getListaPersonas().add(rep2);
 
-            // ===== Pedidos (mínimos) =====
+            // ===== Pedidos DEMO (estados/asinaciones/incidencias) =====
             HistorialPedido hist = HistorialPedido.getInstance();
             for (int i = 1; i <= 8; i++) {
-                // Si tienes CarritoDeCompras, úsalo; si no, pasa null (tu Pedido lo tolera).
+                // Si tienes CarritoDeCompras, puedes crearlo y pasarle items; si no, deja null.
                 // CarritoDeCompras carrito = new CarritoDeCompras();
                 // Pedido p = new Pedido("DEMO" + i, carrito);
                 Pedido p = new Pedido("DEMO" + i, /*carrito*/ null);
 
-                // Opcional: si estos métodos existen en tu Pedido/Estado, puedes activarlos.
-                // En caso de duda, DEJA COMENTADO para que no rompa.
-                // p.verificarPago();
-                // p.empaquetar();
-                // p.enviar();
-                // if (i % 3 == 0) p.entregar();
+                // Avanzar estados en orden seguro (PAGADO -> VERIFICAR -> EMPAQUETAR -> ENVIAR -> ENTREGAR)
+                int etapa = i % 5; // reparte los pedidos en distintos estados
+                if (etapa >= 1) p.procesar("verificacionpago");
+                if (etapa >= 2) p.procesar("empaquetado");
+                if (etapa >= 3) p.procesar("enviado");
+                if (etapa >= 4) p.procesar("entregado"); // también marca fechaEntrega en tu Pedido
+
+                // Asignar repartidor a los 3 primeros para que se vea la columna Asignación
+                if (i <= 3) {
+                    p.asignarRepartidor("300"); // Diana Suárez (Norte)
+                }
+
+                // Registrar incidencias si existe la clase Incidencia (reflexión para no romper si no está)
+                try {
+                    if (i == 3 || i == 6) {
+                        Class<?> k = Class.forName("co.edu.uniquindio.poo.amazen.Model.Incidencia");
+                        Object inc = k.getConstructor(String.class, String.class, String.class)
+                                .newInstance("Norte", "No responde", "Cliente no contesta");
+                        Pedido.class.getMethod("registrarIncidencia", k).invoke(p, inc);
+                    }
+                } catch (Throwable ignore) {
+                    // Si no existe Incidencia o su firma cambia, simplemente no se registran
+                }
 
                 hist.registrarPedido(p);
             }
 
             System.out.println("[DEMO] Personas: " + sistema.getListaPersonas().size()
-                    + " | Pedidos: " + hist.obtenerPedidos().size());
+                    + " | Pedidos creados: " + hist.obtenerPedidos().size());
 
         } catch (Throwable t) {
             System.err.println("[DEMO] Falló la carga de datos demo. Continuando sin demo.");
@@ -99,5 +119,7 @@ public class App extends Application {
         }
     }
 
-    public static void main(String[] args) { launch(args); }
+    public static void main(String[] args) {
+        launch(args);
+    }
 }

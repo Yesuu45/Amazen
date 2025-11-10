@@ -4,6 +4,7 @@ import co.edu.uniquindio.poo.amazen.Model.HistorialPedido;
 import co.edu.uniquindio.poo.amazen.Controller.GestorEstadosController;
 import co.edu.uniquindio.poo.amazen.Controller.GestorPedidosController;
 import co.edu.uniquindio.poo.amazen.Model.Amazen;
+import co.edu.uniquindio.poo.amazen.Model.Incidencia;
 import co.edu.uniquindio.poo.amazen.Model.Pedido;
 import co.edu.uniquindio.poo.amazen.Model.Persona.Persona;
 import co.edu.uniquindio.poo.amazen.Model.Persona.Repartidor;
@@ -70,13 +71,13 @@ public class AdminEnviosViewController {
     }
 
     private void cargarRepartidores() {
-        List<Persona> personas = Amazen.getInstance().getListaPersonas();
         cmbRepartidores.getItems().clear();
-        personas.stream()
+        Amazen.getInstance().getListaPersonas().stream()
                 .filter(p -> p instanceof Repartidor)
                 .map(Persona::getDocumento)
                 .forEach(doc -> cmbRepartidores.getItems().add(doc));
     }
+
 
     private void cargarPedidos() {
         pedidosView.setAll(HistorialPedido.getInstance().obtenerPedidos()); // <- AQUÍ el cambio
@@ -99,18 +100,19 @@ public class AdminEnviosViewController {
         String docRep = cmbRepartidores.getValue();
         if (sel == null) { error("Seleccione un pedido", "Elija un pedido en la tabla."); return; }
         if (docRep == null || docRep.isBlank()) { error("Seleccione un repartidor", "Elija un documento de repartidor."); return; }
-        gestorPedidos.asignarRepartidor(sel.getId(), docRep);
+
+        sel.asignarRepartidor(docRep);                     // ✅ usa tu método del modelo
         tblPedidos.refresh();
         info("Asignado", "Repartidor asignado al pedido " + sel.getId());
     }
-
     @FXML
     private void onReasignar() {
         Pedido sel = tblPedidos.getSelectionModel().getSelectedItem();
         String docRep = cmbRepartidores.getValue();
         if (sel == null) { error("Seleccione un pedido", "Elija un pedido en la tabla."); return; }
         if (docRep == null || docRep.isBlank()) { error("Seleccione un repartidor", "Elija un documento de repartidor."); return; }
-        gestorPedidos.reasignarRepartidor(sel.getId(), docRep);
+
+        sel.asignarRepartidor(docRep);                     // ✅ mismo método (reasigna y marca fecha)
         tblPedidos.refresh();
         info("Reasignado", "Repartidor reasignado al pedido " + sel.getId());
     }
@@ -122,9 +124,12 @@ public class AdminEnviosViewController {
     private void cambiarEstado(String accion) {
         Pedido sel = tblPedidos.getSelectionModel().getSelectedItem();
         if (sel == null) { error("Seleccione un pedido", "Elija un pedido en la tabla."); return; }
+
         gestorEstados.setPedido(sel);
-        boolean ok = gestorEstados.cambiarEstado(accion);
-        if (ok) { tblPedidos.refresh(); info("Estado actualizado", "Se aplicó: " + accion.toUpperCase()); }
+        if (gestorEstados.cambiarEstado(accion)) {
+            tblPedidos.refresh();                          // ✅ refresca columnas Estado/Entrega
+            info("Estado actualizado", "Se aplicó: " + accion.toUpperCase());
+        }
     }
 
     @FXML
@@ -150,10 +155,11 @@ public class AdminEnviosViewController {
         String detalle = dDet.showAndWait().orElse(null);
         if (detalle == null) return;
 
-        gestorPedidos.registrarIncidencia(sel.getId(), zona, tipo, detalle);
+        sel.registrarIncidencia(new Incidencia(zona, tipo, detalle)); // ✅ tu API del modelo
         tblPedidos.refresh();
         info("Incidencia registrada", "Quedó asociada al pedido " + sel.getId());
     }
+
 
     @FXML
     private void onCerrar() {
