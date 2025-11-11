@@ -18,16 +18,9 @@ public class AmazenViewController {
     @FXML private Button botonCarrito;
     @FXML private Button botonHistorial;
     @FXML private Button botonEstado;
+    @FXML private Button botonMisEnvios;
     @FXML private Button botonAdmin;
     @FXML private Button botonCerrarSesion;
-    @FXML public Button botonCatalogo;
-    @FXML public Button botonCarrito;
-    @FXML public Button botonHistorial;
-    @FXML public Button botonEstado;
-    @FXML public Button botonMisEnvios;
-
-    // 👇 botón exclusivo de administradores
-    @FXML public Button botonAdmin;
 
     @FXML private Label tituloLabel;
 
@@ -53,17 +46,22 @@ public class AmazenViewController {
     }
 
     // ================= MÉTODOS DE VISIBILIDAD =================
-    public void actualizarTitulo(String titulo) { tituloLabel.setText(titulo); }
+    public void actualizarTitulo(String titulo) {
+        tituloLabel.setText(titulo);
+    }
+
     public void setBotonAdminVisible(boolean visible) {
         if (botonAdmin != null) {
             botonAdmin.setVisible(visible);
             botonAdmin.setDisable(!visible);
         }
     }
+
     public void mostrarBotonCatalogo(boolean visible)  { botonCatalogo.setVisible(visible); }
     public void mostrarBotonCarrito(boolean visible)   { botonCarrito.setVisible(visible); }
     public void mostrarBotonHistorial(boolean visible) { botonHistorial.setVisible(visible); }
     public void mostrarBotonEstado(boolean visible)    { botonEstado.setVisible(visible); }
+    public void mostrarBotonMisEnvios(boolean visible) { botonMisEnvios.setVisible(visible); }
 
     // ================= NAVEGACIÓN =================
     @FXML private void irAlCatalogo()  { cambiarEscena("/co/edu/uniquindio/poo/amazen/catalogo.fxml", botonCatalogo); }
@@ -103,22 +101,25 @@ public class AmazenViewController {
             e.printStackTrace();
         }
     }
+
     @FXML
     private void irPanelRepartidor() {
         final String FXML = "/co/edu/uniquindio/poo/amazen/repartidor.fxml";
         try {
-            var loader = new javafx.fxml.FXMLLoader(getClass().getResource(FXML));
-            var scene  = new javafx.scene.Scene(loader.load());
-            var stage  = (javafx.stage.Stage) botonMisEnvios.getScene().getWindow();
+            var loader = new FXMLLoader(getClass().getResource(FXML));
+            var scene  = new Scene(loader.load());
+            var stage  = (Stage) botonMisEnvios.getScene().getWindow();
             stage.setScene(scene);
             stage.setTitle("Panel del Repartidor");
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();
             var a = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR,
-                    "No se pudo abrir el panel del repartidor", javafx.scene.control.ButtonType.OK);
-            a.setHeaderText("Error"); a.showAndWait();
+                    "No se pudo abrir el panel del repartidor",
+                    javafx.scene.control.ButtonType.OK);
+            a.setHeaderText("Error");
+            a.showAndWait();
         }
     }
-
 }
+

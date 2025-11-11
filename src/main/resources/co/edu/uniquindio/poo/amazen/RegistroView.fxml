@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/8"
+            fx:controller="co.edu.uniquindio.poo.amazen.ViewController.RegistroViewController"
+            prefHeight="600" prefWidth="800"
+            style="-fx-background-color: linear-gradient(to bottom right, #f8f9fa, #e9ecef);">
+
+    <children>
+
+        <!-- Panel principal -->
+        <VBox alignment="CENTER"
+              layoutX="200" layoutY="50"
+              prefWidth="400" prefHeight="500"
+              spacing="15"
+              style="-fx-background-color: white; -fx-background-radius: 15;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3);">
+
+            <padding>
+                <Insets top="25" right="30" bottom="25" left="30"/>
+            </padding>
+
+            <children>
+
+                <!-- Título -->
+                <Label text="Registro de Usuario"
+                       style="-fx-font-weight: bold; -fx-text-fill: #2a2a2a;">
+                    <font>
+                        <Font size="22"/>
+                    </font>
+                </Label>
+
+                <!-- Campos de entrada -->
+                <VBox spacing="10" prefWidth="300">
+                    <children>
+
+                        <TextField fx:id="textFieldNombre"
+                                   promptText="Nombre"
+                                   style="-fx-background-radius: 8; -fx-padding: 8;" />
+
+                        <TextField fx:id="textFieldApellido"
+                                   promptText="Apellido"
+                                   style="-fx-background-radius: 8; -fx-padding: 8;" />
+
+                        <TextField fx:id="textFieldEmail"
+                                   promptText="Correo electrónico"
+                                   style="-fx-background-radius: 8; -fx-padding: 8;" />
+
+                        <TextField fx:id="textFieldTelefono"
+                                   promptText="Teléfono fijo"
+                                   style="-fx-background-radius: 8; -fx-padding: 8;" />
+
+                        <TextField fx:id="textFieldCelular"
+                                   promptText="Celular"
+                                   style="-fx-background-radius: 8; -fx-padding: 8;" />
+
+                        <TextField fx:id="textFieldDireccion"
+                                   promptText="Dirección"
+                                   style="-fx-background-radius: 8; -fx-padding: 8;" />
+
+                        <TextField fx:id="textFieldDocumento"
+                                   promptText="Documento de identidad"
+                                   style="-fx-background-radius: 8; -fx-padding: 8;" />
+
+                        <PasswordField fx:id="textFieldContrasena"
+                                       promptText="Contraseña"
+                                       style="-fx-background-radius: 8; -fx-padding: 8;" />
+                    </children>
+                </VBox>
+
+                <!-- Botón de registro -->
+                <Button fx:id="buttonRegistrar"
+                        onAction="#buttonRegistrar"
+                        prefWidth="200"
+                        prefHeight="35"
+                        text="Registrarse"
+                        style="-fx-background-color: #0078D7; -fx-text-fill: white;
+                               -fx-background-radius: 8; -fx-font-weight: bold;" />
+
+                <!-- Link para volver -->
+                <Hyperlink text="Volver al inicio de sesión"
+                           onAction="#volverLogin"
+                           style="-fx-text-fill: #0078D7;" />
+
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

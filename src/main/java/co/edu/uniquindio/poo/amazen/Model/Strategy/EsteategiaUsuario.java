@@ -11,6 +11,7 @@ public class EsteategiaUsuario implements EstrategiaVista {
         controller.mostrarBotonHistorial(true);
         controller.mostrarBotonEstado(false);
         controller.setBotonAdminVisible(false);
+        controller.mostrarBotonMisEnvios(false);
 
         controller.actualizarTitulo("Bienvenido Usuario - MercadoLibre");
     }

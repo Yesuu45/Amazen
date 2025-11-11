@@ -7,7 +7,5 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 @SuperBuilder
-
 public class Usuario extends Persona {
-
 }
