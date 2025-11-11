@@ -1,13 +1,11 @@
 package co.edu.uniquindio.poo.amazen.Model.Persona;
 
-import co.edu.uniquindio.poo.amazen.Model.Persona.Persona;
-
 public class SesionUsuario {
 
     private static SesionUsuario INSTANCIA;
     private Persona persona;
 
-    private SesionUsuario() { }
+    private SesionUsuario() {}
 
     public static SesionUsuario instancia() {
         if (INSTANCIA == null) {

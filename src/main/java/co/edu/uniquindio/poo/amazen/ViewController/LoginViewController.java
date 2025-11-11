@@ -26,44 +26,34 @@ public class LoginViewController {
         String documento = textFieldID.getText().trim();
         String contrasena = textFieldPassword.getText().trim();
 
-        if(documento.isEmpty() || contrasena.isEmpty()){
+        if (documento.isEmpty() || contrasena.isEmpty()) {
             mostrarAlerta("Campos vacíos", "Por favor completa todos los campos.", Alert.AlertType.WARNING);
             return;
         }
 
         boolean exito = loginController.iniciarSesion(documento, contrasena);
 
-        if(exito){
-            Persona persona = loginController.getPersonaActiva();
+        if (exito) {
+            Persona persona = loginController.getUsuarioActivo();
             TiendaSession.getInstance().setPersonaActiva(persona);
 
             mostrarAlerta("Bienvenido", "Sesión iniciada correctamente para " + persona.getNombre(), Alert.AlertType.INFORMATION);
-            abrirAmazen();
+            abrirAmazen(persona);
+
+            Stage stage = (Stage) buttonIngresar.getScene().getWindow();
+            if (stage != null) stage.close();
 
         } else {
-
-            // 🔹 Guardar el usuario logueado globalmente
-            co.edu.uniquindio.poo.amazen.Model.Persona.SesionUsuario
-                    .instancia().iniciarSesion(persona);
-
-            mostrarAlerta("Bienvenido", "Sesión iniciada correctamente para " + persona.getNombre(), Alert.AlertType.INFORMATION);
-            abrirVentanaPrincipal(persona);
-            ((Stage) buttonIngresar.getScene().getWindow()).close();
-        }
-        else {
             mostrarAlerta("Error", "Credenciales incorrectas. Verifique su ID o contraseña.", Alert.AlertType.ERROR);
         }
     }
 
-    private void abrirAmazen() {
+    private void abrirAmazen(Persona persona) {
         try {
             FXMLLoader loader = new FXMLLoader(App.class.getResource("amazen.fxml"));
             Scene scene = new Scene(loader.load());
-
             AmazenViewController controller = loader.getController();
 
-            // Estrategia según tipo de usuario
-            Persona persona = TiendaSession.getInstance().getPersonaActiva();
             if (persona instanceof Administrador) {
                 controller.setEstrategiaVista(new EstrategiaAdmin());
             } else if (persona instanceof Usuario) {
@@ -72,7 +62,7 @@ public class LoginViewController {
                 controller.setEstrategiaVista(new EstrategiaRepartidor());
             }
 
-            Stage stage = (Stage) buttonIngresar.getScene().getWindow();
+            Stage stage = new Stage();
             stage.setTitle("Panel Amazen");
             stage.setScene(scene);
             stage.show();
@@ -85,20 +75,20 @@ public class LoginViewController {
 
     @FXML
     void hyperlinkRegistrar(ActionEvent event) {
-        try{
+        try {
             FXMLLoader loader = new FXMLLoader(App.class.getResource("RegistroView.fxml"));
             Scene scene = new Scene(loader.load());
             Stage stage = new Stage();
             stage.setTitle("Registro de Usuario");
             stage.setScene(scene);
             stage.show();
-        } catch(Exception e){
+        } catch (Exception e) {
             mostrarAlerta("Error", "No se pudo abrir la ventana de registro.", Alert.AlertType.ERROR);
             e.printStackTrace();
         }
     }
 
-    private void mostrarAlerta(String titulo, String mensaje, Alert.AlertType tipo){
+    private void mostrarAlerta(String titulo, String mensaje, Alert.AlertType tipo) {
         Alert alerta = new Alert(tipo);
         alerta.setTitle(titulo);
         alerta.setHeaderText(null);

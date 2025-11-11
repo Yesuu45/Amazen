@@ -10,14 +10,13 @@ public class EstrategiaRepartidor implements EstrategiaVista{
         controller.mostrarBotonCarrito(false);
         controller.mostrarBotonHistorial(false);
         controller.mostrarBotonEstado(true);
-        controller.botonMisEnvios.setVisible(true);
-        controller.botonMisEnvios.setDisable(false);
+        controller.mostrarBotonMisEnvios(true);
 
 
-        controller.botonCatalogo.setVisible(false);
-        controller.botonCarrito.setVisible(false);
-        controller.botonHistorial.setVisible(false);
-        controller.botonEstado.setVisible(false);
+        controller.mostrarBotonCatalogo(false);
+        controller.mostrarBotonCarrito(false);
+        controller.mostrarBotonHistorial(false);
+        controller.mostrarBotonEstado(false);
         controller.setBotonAdminVisible(false);
 
         controller.actualizarTitulo("Panel Repartidor - Amazen");
