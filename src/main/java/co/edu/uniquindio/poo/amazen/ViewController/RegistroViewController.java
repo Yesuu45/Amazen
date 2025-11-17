@@ -9,6 +9,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class RegistroViewController {
@@ -27,15 +30,32 @@ public class RegistroViewController {
 
     @FXML
     void buttonRegistrar(ActionEvent event) {
-        // Validar campos vacíos
-        if (textFieldNombre.getText().isEmpty() || textFieldApellido.getText().isEmpty()
-                || textFieldEmail.getText().isEmpty() || textFieldDocumento.getText().isEmpty()
-                || textFieldContrasena.getText().isEmpty()) {
-            mostrarAlerta("Campos vacíos", "Por favor completa todos los campos obligatorios.", Alert.AlertType.WARNING);
+
+        // Validar campos obligatorios
+        if (textFieldNombre.getText().isEmpty() ||
+                textFieldApellido.getText().isEmpty() ||
+                textFieldEmail.getText().isEmpty() ||
+                textFieldDocumento.getText().isEmpty() ||
+                textFieldContrasena.getText().isEmpty()) {
+
+            mostrarAlerta("Campos vacíos",
+                    "Por favor completa todos los campos obligatorios.",
+                    Alert.AlertType.WARNING);
             return;
         }
 
-        // Crear nuevo usuario
+        // ==========================================
+        // Crear lista de direcciones inicial
+        // ==========================================
+        List<String> direcciones = new ArrayList<>();
+
+        if (!textFieldDireccion.getText().isEmpty()) {
+            direcciones.add(textFieldDireccion.getText());
+        }
+
+        // ==========================================
+        // Crear nuevo usuario con Builder
+        // ==========================================
         Usuario nuevoUsuario = Usuario.builder()
                 .id(UUID.randomUUID())
                 .nombre(textFieldNombre.getText())
@@ -43,19 +63,25 @@ public class RegistroViewController {
                 .email(textFieldEmail.getText())
                 .telefono(textFieldTelefono.getText())
                 .celular(textFieldCelular.getText())
-                .direccion(textFieldDireccion.getText())
+                .direcciones(direcciones)   // ← ahora sí funciona
                 .documento(textFieldDocumento.getText())
                 .contrasena(textFieldContrasena.getText())
                 .build();
 
-        // Registrar
+        // Registrar usuario
         boolean registrado = registroController.registrarUsuario(nuevoUsuario);
 
         if (registrado) {
-            mostrarAlerta("Registro exitoso", "Tu cuenta ha sido creada correctamente.", Alert.AlertType.INFORMATION);
+            mostrarAlerta("Registro exitoso",
+                    "Tu cuenta ha sido creada correctamente.",
+                    Alert.AlertType.INFORMATION);
+
             volverLogin(null);
+
         } else {
-            mostrarAlerta("Error", "Ya existe un usuario con ese documento.", Alert.AlertType.ERROR);
+            mostrarAlerta("Error",
+                    "Ya existe un usuario con ese documento.",
+                    Alert.AlertType.ERROR);
         }
     }
 
@@ -73,6 +99,9 @@ public class RegistroViewController {
         }
     }
 
+    // ===========================================================
+    // MÉTODO PARA MOSTRAR ALERTAS
+    // ===========================================================
     private void mostrarAlerta(String titulo, String mensaje, Alert.AlertType tipo) {
         Alert alerta = new Alert(tipo);
         alerta.setTitle(titulo);

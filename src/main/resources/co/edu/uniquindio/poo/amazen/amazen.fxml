@@ -59,12 +59,21 @@
                 <Button fx:id="botonAdmin"
                         text="Gestión Admin"
                         onAction="#irAGestionAdmin"
-                        visible="false"  disable="true"/>
+                        visible="false" disable="true"/>
 
-                <Button fx:id="botonMisEnvios" text="Mis envíos" onAction="#irPanelRepartidor"/>
+                <Button fx:id="botonMisEnvios" text="Mis envíos" onAction="#irPanelRepartidor"
+                        style="-fx-background-color: #9966ff; -fx-text-fill: white;
+                               -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10;"
+                        prefWidth="220" prefHeight="45"/>
 
+                <!-- NUEVO BOTÓN GESTIONAR PERFIL -->
+                <Button fx:id="botonGestionPerfil" text="Gestionar Perfil" onAction="#irGestionPerfil"
+                        style="-fx-background-color: #ffaa33; -fx-text-fill: white;
+                               -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10;"
+                        prefWidth="220" prefHeight="45"/>
             </VBox>
 
         </VBox>
     </children>
 </AnchorPane>
+
