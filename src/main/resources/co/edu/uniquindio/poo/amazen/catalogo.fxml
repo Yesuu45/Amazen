@@ -45,7 +45,7 @@
                                 <Button fx:id="btnBuscar" onAction="#buscarProducto"
                                         style="-fx-background-color: #2980b9; -fx-text-fill: white;"
                                         text="Buscar"/>
-                                <Button fx:id="btnMostrarTodos"
+                                <Button fx:id="btnMostrarTodos" onAction="#mostrarTodos"
                                         style="-fx-background-color: #7f8c8d; -fx-text-fill: white;"
                                         text="Mostrar todos"/>
                             </children>
@@ -79,6 +79,29 @@
                                 text="Clonar Producto Seleccionado"/>
                     </children>
                 </HBox>
+
+                <!-- DIRECCIÓN / MAPA -->
+                <TitledPane expanded="true" prefWidth="820" text="Dirección de envío">
+                    <content>
+                        <VBox spacing="10">
+                            <padding>
+                                <Insets bottom="10" left="10" right="10" top="10"/>
+                            </padding>
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <children>
+                                        <Label text="Dirección:"/>
+                                        <TextField fx:id="txtDireccion" prefWidth="400" promptText="Escriba su dirección"/>
+                                        <Button fx:id="btnSeleccionarMapa" onAction="#onSeleccionarMapa"
+                                                style="-fx-background-color: #3498db; -fx-text-fill: white;" text="Seleccionar en Mapa"/>
+                                        <Button fx:id="btnConfirmarDireccion" onAction="#onConfirmarDireccion"
+                                                style="-fx-background-color: #2ecc71; -fx-text-fill: white;" text="Confirmar Dirección"/>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </content>
+                </TitledPane>
 
                 <!-- AGREGAR / EDITAR PRODUCTO (SOLO ADMIN) -->
                 <TitledPane fx:id="panelAgregarProducto" expanded="true" prefWidth="820" text="Agregar / Editar producto">

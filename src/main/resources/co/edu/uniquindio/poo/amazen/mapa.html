@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Mapa de entrega</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+<div id="map" style="width: 100%; height: 550px;"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    var map = L.map('map').setView([4.6097, -74.0817], 12); // Bogotá
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    var markerDestino;
+    var markerOrigen;
+
+    function setMarkerOrigen(lat, lng){
+        if(markerOrigen) map.removeLayer(markerOrigen);
+        markerOrigen = L.marker([lat, lng]).addTo(map).bindPopup("Origen").openPopup();
+    }
+
+    function setMarkerDestino(lat, lng){
+        if(markerDestino) map.removeLayer(markerDestino);
+        markerDestino = L.marker([lat, lng]).addTo(map).bindPopup("Destino").openPopup();
+    }
+
+    map.on('click', function(e) {
+        if(markerDestino) map.removeLayer(markerDestino);
+        markerDestino = L.marker(e.latlng).addTo(map).bindPopup("Destino").openPopup();
+
+        if(window.app){
+            window.app.setDireccion(e.latlng.lat, e.latlng.lng);
+        }
+    });
+</script>
+</body>
+</html>

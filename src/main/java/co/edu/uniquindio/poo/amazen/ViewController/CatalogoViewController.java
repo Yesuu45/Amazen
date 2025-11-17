@@ -2,9 +2,7 @@ package co.edu.uniquindio.poo.amazen.ViewController;
 
 import co.edu.uniquindio.poo.amazen.App;
 import co.edu.uniquindio.poo.amazen.Controller.ProductoController;
-import co.edu.uniquindio.poo.amazen.Model.CarritoDeCompras;
-import co.edu.uniquindio.poo.amazen.Model.Inventario;
-import co.edu.uniquindio.poo.amazen.Model.Producto;
+import co.edu.uniquindio.poo.amazen.Model.*;
 import co.edu.uniquindio.poo.amazen.Model.Strategy.*;
 import co.edu.uniquindio.poo.amazen.Model.TiendaSession;
 import javafx.collections.FXCollections;
@@ -35,7 +33,6 @@ public class CatalogoViewController {
     @FXML private TextField txtId;
     @FXML private TextField txtNombre;
     @FXML private TextField txtPrecio;
-
     @FXML private CheckBox chkDisponible;
 
     // =================== BUSQUEDA / CANTIDAD ===================
@@ -43,14 +40,16 @@ public class CatalogoViewController {
     @FXML private TextField txtCantidad;
 
     // =================== BOTONES ===================
-    @FXML private Button btnBuscar;
-    @FXML private Button btnMostrarTodos;
     @FXML private Button btnAgregarCarrito;
     @FXML private Button btnClonar;
     @FXML private Button btnAgregar;
     @FXML private Button btnLimpiar;
-    @FXML
-    private Button botonVolver;
+    @FXML private Button botonVolver;
+    @FXML private Button btnSeleccionarMapa;
+    @FXML private Button btnConfirmarDireccion;
+
+    // =================== CAMPOS DIRECCION ===================
+    @FXML private TextField txtDireccion;
 
     // =================== PANELES ===================
     @FXML private TitledPane panelAgregarProducto;
@@ -60,11 +59,16 @@ public class CatalogoViewController {
     private CarritoDeCompras carrito;
     private ObservableList<Producto> datosTabla;
 
+    // =================== ENVÍO ===================
+    private Direccion direccionUsuario;
+    private Direccion origenTienda;
+    private Envio envio;
+
+    // =================== INICIALIZACIÓN ===================
     @FXML
     private void initialize() {
-        Inventario inventario = TiendaSession.getInstance().getInventario();
         carrito = TiendaSession.getInstance().getCarrito();
-        productoController = new ProductoController(inventario);
+        productoController = new ProductoController(TiendaSession.getInstance().getInventario());
 
         // Configuración de columnas
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -76,12 +80,15 @@ public class CatalogoViewController {
         datosTabla = FXCollections.observableArrayList(productoController.obtenerTodos());
         tablaProductos.setItems(datosTabla);
 
-        // ===== Aplicar estrategia según usuario =====
+        // Estrategia según tipo de usuario
         if(TiendaSession.getInstance().esAdministrador()){
             setEstrategiaVistaCatalogo(new EstrategiaCatalogoAdmin());
         } else {
             setEstrategiaVistaCatalogo(new EstrategiaCatalogoUsuario());
         }
+
+        // Dirección fija de la tienda (origen)
+        origenTienda = new Direccion(4.60971, -74.08175, "Tienda Bogotá");
     }
 
     // ================= STRATEGY =================
@@ -92,28 +99,19 @@ public class CatalogoViewController {
         }
     }
 
-    public void mostrarPanelAgregarProducto(boolean visible) {
-        if (panelAgregarProducto != null) {
-            panelAgregarProducto.setVisible(visible);
-            panelAgregarProducto.setManaged(visible);
-        }
+    public void mostrarPanelAgregarProducto(boolean mostrar) {
+        if(panelAgregarProducto != null) panelAgregarProducto.setVisible(mostrar);
     }
 
-    public void mostrarBotonAgregarCarrito(boolean visible) {
-        if (btnAgregarCarrito != null) {
-            btnAgregarCarrito.setVisible(visible);
-            btnAgregarCarrito.setManaged(visible);
-        }
+    public void mostrarBotonAgregarCarrito(boolean mostrar) {
+        if(btnAgregarCarrito != null) btnAgregarCarrito.setVisible(mostrar);
     }
 
-    public void mostrarBotonClonar(boolean visible) {
-        if (btnClonar != null) {
-            btnClonar.setVisible(visible);
-            btnClonar.setManaged(visible);
-        }
+    public void mostrarBotonClonar(boolean mostrar) {
+        if(btnClonar != null) btnClonar.setVisible(mostrar);
     }
 
-    // ================= ACCIONES =================
+    // ================= ACCIONES PRODUCTOS =================
     @FXML
     private void buscarProducto() {
         String nombre = txtBuscar.getText().trim();
@@ -133,12 +131,19 @@ public class CatalogoViewController {
             mostrarAlerta("Selecciona un producto", "Debes seleccionar un producto para agregar al carrito.");
             return;
         }
+
         int cantidad = leerCantidad();
-        if (cantidad <= 0) {
+        if(cantidad <= 0){
             mostrarAlerta("Cantidad inválida", "La cantidad debe ser mayor que cero.");
             return;
         }
+
         carrito.agregarProducto(seleccionado, cantidad);
+
+        if(envio == null && direccionUsuario != null) {
+            crearEnvio(seleccionado.getPeso() * cantidad, 0.01 * cantidad);
+        }
+
         mostrarInfo("Agregado al carrito", "Producto agregado: " + seleccionado.getNombre() + " x" + cantidad);
     }
 
@@ -191,6 +196,42 @@ public class CatalogoViewController {
         txtBuscar.clear();
         txtCantidad.setText("1");
         tablaProductos.getSelectionModel().clearSelection();
+        txtDireccion.clear();
+    }
+
+    // ================= ACCIONES DIRECCIÓN =================
+    @FXML
+    private void onSeleccionarMapa() {
+        // Se pasa el origen y el destino actual (si existe)
+        App.mostrarMapa(this, origenTienda, direccionUsuario);
+    }
+
+    @FXML
+    private void onConfirmarDireccion() {
+        String nombre = txtDireccion.getText().trim();
+        if(nombre.isEmpty()){
+            mostrarAlerta("Dirección vacía", "Debes escribir tu dirección");
+            return;
+        }
+        establecerDireccionUsuario(0, 0, nombre);
+        mostrarInfo("Dirección establecida", "Se registró tu dirección: " + nombre);
+    }
+
+    // ================= MÉTODO DE DIRECCIÓN =================
+    public void establecerDireccionUsuario(double lat, double lng, String nombre){
+        direccionUsuario = new Direccion(lat, lng, nombre);
+        txtDireccion.setText(nombre);
+        System.out.println("Dirección usuario establecida: " + direccionUsuario);
+    }
+
+    public void crearEnvio(double peso, double volumen){
+        if(origenTienda == null || direccionUsuario == null){
+            mostrarAlerta("Dirección incompleta", "Debes seleccionar o ingresar la dirección de entrega");
+            return;
+        }
+        envio = new Envio(origenTienda, direccionUsuario, peso, volumen);
+        mostrarInfo("Envío listo", String.format("Distancia: %.2f km | Precio: %.2f",
+                envio.calcularDistanciaKm(), envio.calcularPrecio()));
     }
 
     // =================== BOTÓN VOLVER ===================
@@ -237,5 +278,9 @@ public class CatalogoViewController {
         if (estrategiaVistaCatalogo != null) {
             estrategiaVistaCatalogo.mostrarCatalogo(this);
         }
+    }
+
+    public Envio getEnvio() {
+        return envio;
     }
 }
