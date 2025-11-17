@@ -1,0 +1,4 @@
+id,estado,total,repartidorDocumento,fechaCreacion,fechaAsignacion,fechaEntrega,incidencias
+DEMO1,ENTREGADO,0.0,300,2025-11-10 15:17,2025-11-10 15:17,2025-11-10 15:17,0
+DEMO2,EMPAQUETADO,0.0,300,2025-11-10 15:17,2025-11-10 15:17,,0
+DEMO3,ENVIADO,0.0,300,2025-11-10 15:17,2025-11-10 15:17,,1

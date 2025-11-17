@@ -36,10 +36,12 @@ public class Inventario {
 
     public void inicializarData() {
         if (!productos.isEmpty()) return;
-        agregarProducto(new Producto("P001", "Laptop", 899.99, true));
-        agregarProducto(new Producto("P002", "Smartphone", 499.99, true));
-        agregarProducto(new Producto("P003", "Tablet", 299.99, true));
-        agregarProducto(new Producto("P004", "Auriculares", 99.99, true));
+
+        // id, nombre, precio, disponible, pesoKg, volumenCm3 (valores solo de ejemplo)
+        agregarProducto(new Producto("P001", "Laptop",      899.99, true,  2.0,  3000));  // 3 L aprox
+        agregarProducto(new Producto("P002", "Smartphone",  499.99, true,  0.3,   400));
+        agregarProducto(new Producto("P003", "Tablet",      299.99, true,  0.5,   800));
+        agregarProducto(new Producto("P004", "Auriculares",  99.99, true,  0.2,   200));
     }
 
     public String generarIdClon(String baseId) {

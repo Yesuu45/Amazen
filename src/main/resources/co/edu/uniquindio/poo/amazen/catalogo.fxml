@@ -45,7 +45,7 @@
                                 <Button fx:id="btnBuscar" onAction="#buscarProducto"
                                         style="-fx-background-color: #2980b9; -fx-text-fill: white;"
                                         text="Buscar"/>
-                                <Button fx:id="btnMostrarTodos"
+                                <Button fx:id="btnMostrarTodos" onAction="#mostrarTodos"
                                         style="-fx-background-color: #7f8c8d; -fx-text-fill: white;"
                                         text="Mostrar todos"/>
                             </children>
@@ -56,10 +56,13 @@
                 <!-- TABLA DE PRODUCTOS -->
                 <TableView fx:id="tablaProductos" prefHeight="330" prefWidth="820">
                     <columns>
-                        <TableColumn fx:id="colId" prefWidth="120" text="ID"/>
-                        <TableColumn fx:id="colNombre" prefWidth="320" text="Nombre"/>
-                        <TableColumn fx:id="colPrecio" prefWidth="160" text="Precio"/>
-                        <TableColumn fx:id="colDisponible" prefWidth="120" text="Disponible"/>
+                        <TableColumn fx:id="colId"        prefWidth="100" text="ID"/>
+                        <TableColumn fx:id="colNombre"    prefWidth="260" text="Nombre"/>
+                        <TableColumn fx:id="colPrecio"    prefWidth="120" text="Precio"/>
+                        <TableColumn fx:id="colDisponible" prefWidth="100" text="Disponible"/>
+                        <!-- NUEVAS COLUMNAS -->
+                        <TableColumn fx:id="colPeso"      prefWidth="120" text="Peso (kg)"/>
+                        <TableColumn fx:id="colVolumen"   prefWidth="120" text="Volumen (cm³)"/>
                     </columns>
                 </TableView>
 
@@ -104,8 +107,14 @@
                                         <Label text="Precio:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
                                         <TextField fx:id="txtPrecio" promptText="Ingrese precio" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
-                                        <Label text="Disponible:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                                        <CheckBox fx:id="chkDisponible" text="Sí" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                                        <Label text="Peso (kg):" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                                        <TextField fx:id="txtPeso" promptText="Ej: 1.5" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                                        <Label text="Volumen (cm³):" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                                        <TextField fx:id="txtVolumen" promptText="Ej: 1200" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+                                        <Label text="Disponible:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+                                        <CheckBox fx:id="chkDisponible" text="Sí" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
                                     </children>
                                 </GridPane>
 

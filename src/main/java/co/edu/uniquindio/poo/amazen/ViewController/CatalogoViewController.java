@@ -5,7 +5,9 @@ import co.edu.uniquindio.poo.amazen.Controller.ProductoController;
 import co.edu.uniquindio.poo.amazen.Model.CarritoDeCompras;
 import co.edu.uniquindio.poo.amazen.Model.Inventario;
 import co.edu.uniquindio.poo.amazen.Model.Producto;
-import co.edu.uniquindio.poo.amazen.Model.Strategy.*;
+import co.edu.uniquindio.poo.amazen.Model.Strategy.EstrategiaCatalogoAdmin;
+import co.edu.uniquindio.poo.amazen.Model.Strategy.EstrategiaCatalogoUsuario;
+import co.edu.uniquindio.poo.amazen.Model.Strategy.EstrategiaVistaCatalogo;
 import co.edu.uniquindio.poo.amazen.Model.TiendaSession;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -26,17 +28,24 @@ public class CatalogoViewController {
 
     // =================== TABLA ===================
     @FXML private TableView<Producto> tablaProductos;
-    @FXML private TableColumn<Producto, String> colId;
-    @FXML private TableColumn<Producto, String> colNombre;
+    @FXML private TableColumn<Producto, String>  colId;
+    @FXML private TableColumn<Producto, String>  colNombre;
     @FXML private TableColumn<Producto, Double> colPrecio;
     @FXML private TableColumn<Producto, Boolean> colDisponible;
+
+    // NUEVO: columnas de peso y volumen
+    @FXML private TableColumn<Producto, Double> colPeso;
+    @FXML private TableColumn<Producto, Double> colVolumen;
 
     // =================== CAMPOS ===================
     @FXML private TextField txtId;
     @FXML private TextField txtNombre;
     @FXML private TextField txtPrecio;
-
     @FXML private CheckBox chkDisponible;
+
+    // NUEVO: campos de peso y volumen
+    @FXML private TextField txtPeso;
+    @FXML private TextField txtVolumen;
 
     // =================== BUSQUEDA / CANTIDAD ===================
     @FXML private TextField txtBuscar;
@@ -49,8 +58,7 @@ public class CatalogoViewController {
     @FXML private Button btnClonar;
     @FXML private Button btnAgregar;
     @FXML private Button btnLimpiar;
-    @FXML
-    private Button botonVolver;
+    @FXML private Button botonVolver;
 
     // =================== PANELES ===================
     @FXML private TitledPane panelAgregarProducto;
@@ -72,12 +80,20 @@ public class CatalogoViewController {
         colPrecio.setCellValueFactory(new PropertyValueFactory<>("precio"));
         colDisponible.setCellValueFactory(new PropertyValueFactory<>("disponible"));
 
+        // NUEVO: pesoKg y volumenCm3
+        if (colPeso != null) {
+            colPeso.setCellValueFactory(new PropertyValueFactory<>("pesoKg"));
+        }
+        if (colVolumen != null) {
+            colVolumen.setCellValueFactory(new PropertyValueFactory<>("volumenCm3"));
+        }
+
         // Cargar productos iniciales
         datosTabla = FXCollections.observableArrayList(productoController.obtenerTodos());
         tablaProductos.setItems(datosTabla);
 
         // ===== Aplicar estrategia según usuario =====
-        if(TiendaSession.getInstance().esAdministrador()){
+        if (TiendaSession.getInstance().esAdministrador()) {
             setEstrategiaVistaCatalogo(new EstrategiaCatalogoAdmin());
         } else {
             setEstrategiaVistaCatalogo(new EstrategiaCatalogoUsuario());
@@ -147,22 +163,27 @@ public class CatalogoViewController {
         String id = txtId.getText().trim();
         String nombre = txtNombre.getText().trim();
         String precioStr = txtPrecio.getText().trim();
+        String pesoStr = txtPeso != null ? txtPeso.getText().trim() : "";
+        String volumenStr = txtVolumen != null ? txtVolumen.getText().trim() : "";
         boolean disponible = chkDisponible.isSelected();
 
         if (id.isEmpty() || nombre.isEmpty() || precioStr.isEmpty()) {
-            mostrarAlerta("Campos vacíos", "Por favor, completa todos los campos del producto.");
+            mostrarAlerta("Campos vacíos", "Por favor, completa al menos ID, nombre y precio.");
             return;
         }
 
         try {
             double precio = Double.parseDouble(precioStr);
-            Producto nuevo = new Producto(id, nombre, precio, disponible);
+            double peso = pesoStr.isEmpty() ? 0.0 : Double.parseDouble(pesoStr);
+            double volumen = volumenStr.isEmpty() ? 0.0 : Double.parseDouble(volumenStr);
+
+            Producto nuevo = new Producto(id, nombre, precio, disponible, peso, volumen);
             TiendaSession.getInstance().getInventario().agregarProducto(nuevo);
             datosTabla.setAll(productoController.obtenerTodos());
             limpiarCampos();
             mostrarInfo("Producto agregado", "Se ha agregado el producto correctamente.");
         } catch (NumberFormatException e) {
-            mostrarAlerta("Precio inválido", "El precio debe ser un número válido.");
+            mostrarAlerta("Valores inválidos", "Precio, peso y volumen deben ser números válidos.");
         }
     }
 
@@ -187,6 +208,8 @@ public class CatalogoViewController {
         txtId.clear();
         txtNombre.clear();
         txtPrecio.clear();
+        if (txtPeso != null) txtPeso.clear();
+        if (txtVolumen != null) txtVolumen.clear();
         chkDisponible.setSelected(false);
         txtBuscar.clear();
         txtCantidad.setText("1");
