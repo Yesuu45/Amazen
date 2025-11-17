@@ -12,74 +12,67 @@ import java.util.Optional;
 
 public class AdministradorController {
 
-    // ====== LOGIN (si ya lo tienes, conserva tu implementación) ======
+    // ========================= LOGIN =========================
     public Optional<Persona> login(String documento, String clave) {
         return Amazen.getInstance().getListaPersonas().stream()
                 .filter(p -> p.getDocumento().equals(documento) && p.getContrasena().equals(clave))
                 .findFirst();
     }
 
-    // ====== CREAR ADMIN (usa Lombok builders) ======
+    // ========================= CREAR ADMIN =========================
     public Administrador crearAdministrador(String nombre, String apellido, String email, String telefono,
-                                            String direccion, String celular, String documento, String clave) {
+                                            List<String> direcciones, String celular,
+                                            String documento, String clave) {
+
         throwIfDocumentoExiste(documento);
         validarEmail(email);
 
-        Administrador a = Administrador.builder()
+        Administrador admin = Administrador.builder()
                 .nombre(nombre)
                 .apellido(apellido)
                 .email(email)
                 .telefono(telefono)
-                .direccion(direccion)
                 .celular(celular)
                 .documento(documento)
                 .contrasena(clave)
+                .direcciones(direcciones)       // <── AHORA ES LISTA
                 .build();
 
-        Amazen.getInstance().getListaPersonas().add(a);
-        return a;
+        Amazen.getInstance().getListaPersonas().add(admin);
+        return admin;
     }
 
-    // ====== ACTUALIZAR ADMIN ======
+    // ========================= ACTUALIZAR ADMIN =========================
     public boolean actualizarAdministrador(String documento,
                                            String nombre, String apellido, String email, String telefono,
-                                           String direccion, String celular, String clave) {
+                                           List<String> direcciones, String celular, String clave) {
+
         Persona p = findByDocumentoOrThrow(documento);
-        if (!(p instanceof Administrador a)) {
+
+        if (!(p instanceof Administrador admin)) {
             throw new IllegalArgumentException("No es administrador");
         }
-        patchPersona(a, nombre, apellido, email, telefono, direccion, celular, clave);
+
+        patchPersona(admin, nombre, apellido, email, telefono, direcciones, celular, clave);
         return true;
     }
 
-    // ====== ACTUALIZAR PERSONA (Usuario) ======
+    // ======================= ACTUALIZAR PERSONA =========================
     public boolean actualizarPersona(String documento,
                                      String nombre, String apellido, String email, String telefono,
-                                     String direccion, String celular, String clave) {
+                                     List<String> direcciones, String celular, String clave) {
+
         Persona p = findByDocumentoOrThrow(documento);
-        patchPersona(p, nombre, apellido, email, telefono, direccion, celular, clave);
+
+        patchPersona(p, nombre, apellido, email, telefono, direcciones, celular, clave);
         return true;
     }
 
-    // ====== ELIMINAR ADMIN/PERSONA ======
-    public boolean eliminarAdministrador(String documento) { return eliminarPersona(documento); }
-
-    public boolean eliminarPersona(String documento) {
-        List<Persona> lista = Amazen.getInstance().getListaPersonas();
-        return lista.removeIf(p -> p.getDocumento().equals(documento));
-    }
-
-    // ====== CAMBIAR DISPONIBILIDAD (Repartidor) ======
-    public boolean cambiarDisponibilidad(String documento, Disponibilidad nueva) {
-        Persona p = findByDocumentoOrThrow(documento);
-        if (!(p instanceof Repartidor r)) throw new IllegalArgumentException("La persona no es repartidor");
-        r.setDisponibilidad(nueva);
-        return true;
-    }
-
-    // ====== RF-010: CREAR USUARIO (builder) ======
+    // ======================= CREAR USUARIO =========================
     public Usuario crearUsuario(String nombre, String apellido, String email, String telefono,
-                                String direccion, String celular, String documento, String clave) {
+                                List<String> direcciones, String celular,
+                                String documento, String clave) {
+
         throwIfDocumentoExiste(documento);
         validarEmail(email);
 
@@ -88,39 +81,36 @@ public class AdministradorController {
                 .apellido(apellido)
                 .email(email)
                 .telefono(telefono)
-                .direccion(direccion)
                 .celular(celular)
                 .documento(documento)
                 .contrasena(clave)
+                .direcciones(direcciones)      // <── LISTA
                 .build();
 
         Amazen.getInstance().getListaPersonas().add(u);
         return u;
     }
 
-    // ====== RF-011: CREAR REPARTIDOR (builder + zonaCobertura) ======
+    // ======================= CREAR REPARTIDOR =========================
     public Repartidor crearRepartidor(String nombre, String apellido, String email, String telefono,
-                                      String direccion, String celular, String documento, String clave,
+                                      List<String> direcciones, String celular,
+                                      String documento, String clave,
                                       String zonaCobertura, Disponibilidad disponibilidad) {
+
         throwIfDocumentoExiste(documento);
         validarEmail(email);
-        if (zonaCobertura == null || zonaCobertura.isBlank()) {
-            throw new IllegalArgumentException("La zona de cobertura es requerida");
-        }
-        if (disponibilidad == null) disponibilidad = Disponibilidad.INACTIVO;
 
         Repartidor r = Repartidor.builder()
                 .nombre(nombre)
                 .apellido(apellido)
                 .email(email)
                 .telefono(telefono)
-                .direccion(direccion)
                 .celular(celular)
                 .documento(documento)
                 .contrasena(clave)
+                .direcciones(direcciones)
                 .build();
 
-        // OJO: tu clase tiene "ZonaCobertura" (con Z mayúscula) -> el setter de Lombok es setZonaCobertura
         r.setZonaCobertura(zonaCobertura);
         r.setDisponibilidad(disponibilidad);
 
@@ -128,26 +118,52 @@ public class AdministradorController {
         return r;
     }
 
-    // ====== RF-011: ACTUALIZAR REPARTIDOR (incluye zona y disponibilidad) ======
+    // ======================= ACTUALIZAR REPARTIDOR =========================
     public boolean actualizarRepartidor(String documento,
                                         String nombre, String apellido, String email, String telefono,
-                                        String direccion, String celular, String clave,
+                                        List<String> direcciones, String celular, String clave,
                                         String zonaCobertura, Disponibilidad disponibilidad) {
+
         Persona p = findByDocumentoOrThrow(documento);
         if (!(p instanceof Repartidor r)) throw new IllegalArgumentException("No es repartidor");
 
-        patchPersona(r, nombre, apellido, email, telefono, direccion, celular, clave);
+        patchPersona(r, nombre, apellido, email, telefono, direcciones, celular, clave);
 
         if (zonaCobertura != null && !zonaCobertura.isBlank()) {
-            r.setZonaCobertura(zonaCobertura); // coincide con tu modelo actual
+            r.setZonaCobertura(zonaCobertura);
         }
+
         if (disponibilidad != null) {
             r.setDisponibilidad(disponibilidad);
         }
         return true;
     }
 
-    // ====== Helpers ======
+    // ======================= HELPER: PATCH =========================
+    private void patchPersona(Persona p,
+                              String nombre, String apellido, String email, String telefono,
+                              List<String> direcciones, String celular, String clave) {
+
+        if (nombre != null) p.setNombre(nombre);
+        if (apellido != null) p.setApellido(apellido);
+
+        if (email != null) {
+            validarEmail(email);
+            p.setEmail(email);
+        }
+
+        if (telefono != null) p.setTelefono(telefono);
+
+        // 🔥 AHORA ACTUALIZA TODAS LAS DIRECCIONES
+        if (direcciones != null) {
+            p.setDirecciones(direcciones);
+        }
+
+        if (celular != null) p.setCelular(celular);
+        if (clave != null) p.setContrasena(clave);
+    }
+
+    // ========================= OTROS HELPERS =========================
     private Persona findByDocumentoOrThrow(String documento) {
         return Amazen.getInstance().getListaPersonas().stream()
                 .filter(p -> p.getDocumento().equals(documento))
@@ -158,6 +174,7 @@ public class AdministradorController {
     private void throwIfDocumentoExiste(String documento) {
         boolean exists = Amazen.getInstance().getListaPersonas().stream()
                 .anyMatch(p -> p.getDocumento().equals(documento));
+
         if (exists) throw new IllegalArgumentException("El documento ya está registrado");
     }
 
@@ -167,14 +184,10 @@ public class AdministradorController {
         }
     }
 
-    private void patchPersona(Persona p, String nombre, String apellido, String email, String telefono,
-                              String direccion, String celular, String clave) {
-        if (nombre != null)    p.setNombre(nombre);
-        if (apellido != null)  p.setApellido(apellido);
-        if (email != null)     { validarEmail(email); p.setEmail(email); }
-        if (telefono != null)  p.setTelefono(telefono);
-        if (direccion != null) p.setDireccion(direccion);
-        if (celular != null)   p.setCelular(celular);
-        if (clave != null)     p.setContrasena(clave);
+    // ======================= ELIMINAR PERSONA =========================
+    public boolean eliminarPersona(String documento) {
+        Persona p = findByDocumentoOrThrow(documento);
+        return Amazen.getInstance().getListaPersonas().remove(p);
     }
+
 }

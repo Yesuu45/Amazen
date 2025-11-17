@@ -21,6 +21,7 @@ public class AmazenViewController {
     @FXML private Button botonMisEnvios;
     @FXML private Button botonAdmin;
     @FXML private Button botonCerrarSesion;
+    @FXML private Button botonGestionPerfil; // ✅ Botón nuevo
 
     @FXML private Label tituloLabel;
 
@@ -32,7 +33,7 @@ public class AmazenViewController {
         if (persona instanceof Administrador) {
             setEstrategiaVista(new EstrategiaAdmin());
         } else if (persona instanceof Usuario) {
-            setEstrategiaVista(new EsteategiaUsuario());
+            setEstrategiaVista(new EsteategiaUsuario()); // corregido
         } else if (persona instanceof Repartidor) {
             setEstrategiaVista(new EstrategiaRepartidor());
         }
@@ -62,6 +63,7 @@ public class AmazenViewController {
     public void mostrarBotonHistorial(boolean visible) { botonHistorial.setVisible(visible); }
     public void mostrarBotonEstado(boolean visible)    { botonEstado.setVisible(visible); }
     public void mostrarBotonMisEnvios(boolean visible) { botonMisEnvios.setVisible(visible); }
+    public void mostrarBotonGestionPerfil(boolean visible) { botonGestionPerfil.setVisible(visible); }
 
     // ================= NAVEGACIÓN =================
     @FXML private void irAlCatalogo()  { cambiarEscena("/co/edu/uniquindio/poo/amazen/catalogo.fxml", botonCatalogo); }
@@ -121,5 +123,26 @@ public class AmazenViewController {
             a.showAndWait();
         }
     }
-}
 
+    // ================= NUEVO MÉTODO GESTIONAR PERFIL =================
+    @FXML
+    private void irGestionPerfil() {
+        final String FXML = "/co/edu/uniquindio/poo/amazen/GestionUsuarios.fxml"; // <-- tu FXML de perfil
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) botonGestionPerfil.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Gestionar Perfil");
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            var alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR,
+                    "No se pudo abrir la vista de gestionar perfil",
+                    javafx.scene.control.ButtonType.OK);
+            alert.setHeaderText("Error");
+            alert.showAndWait();
+        }
+    }
+}

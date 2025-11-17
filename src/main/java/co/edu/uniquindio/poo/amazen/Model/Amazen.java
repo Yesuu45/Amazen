@@ -23,24 +23,17 @@ public class Amazen {
 
     private static Amazen instancia;
 
-    // ✅ Constructor privado (Singleton)
     private Amazen() {
         this.inventario = Inventario.getInstance();
         this.historialPedido = HistorialPedido.getInstance();
         this.tiendaSession = TiendaSession.getInstance();
         this.listaPersonas = new ArrayList<>();
 
-        // ✅ Primero carga desde archivos si existen
         cargarPersonasDesdeArchivos();
-
-        // ✅ Luego carga siempre los datos quemados (para pruebas)
         cargarDatosIniciales();
-
-        // ✅ Guarda los datos quemados en archivos si aún no existen
         guardarDatosInicialesEnArchivos();
     }
 
-    // ✅ Obtener instancia única
     public static Amazen getInstance() {
         if (instancia == null) {
             instancia = new Amazen();
@@ -48,7 +41,6 @@ public class Amazen {
         return instancia;
     }
 
-    // 🔍 Buscar persona por documento
     public Persona buscarPersonaPorDocumento(String documento) {
         return listaPersonas.stream()
                 .filter(p -> p.getDocumento().equalsIgnoreCase(documento))
@@ -56,13 +48,11 @@ public class Amazen {
                 .orElse(null);
     }
 
-    // ➕ Agregar persona al sistema y al archivo correspondiente
     public void agregarPersona(Persona persona) {
         listaPersonas.add(persona);
         guardarPersonaEnArchivo(persona);
     }
 
-    // 💾 Guardar persona en el archivo según su tipo
     private void guardarPersonaEnArchivo(Persona persona) {
         if (persona instanceof Administrador admin) {
             AdminFileService.guardarAdministrador(admin);
@@ -73,9 +63,6 @@ public class Amazen {
         }
     }
 
-    /**
-     * ✅ Carga personas desde los archivos.
-     */
     private void cargarPersonasDesdeArchivos() {
         List<Usuario> usuariosArchivo = UsuarioFileService.cargarUsuarios();
         List<Administrador> adminsArchivo = AdminFileService.cargarAdministradores();
@@ -89,20 +76,18 @@ public class Amazen {
                 (adminsArchivo.size() + repartidoresArchivo.size() + usuariosArchivo.size()) + " personas)");
     }
 
-    /**
-     * ✅ Crea usuarios, repartidores y administradores quemados.
-     */
     private void cargarDatosIniciales() {
+
         if (buscarPersonaPorDocumento("111") == null) {
             Administrador admin1 = Administrador.builder()
                     .nombre("Andrés")
                     .apellido("García")
                     .email("admin1@amazen.com")
                     .telefono("1234567890")
-                    .direccion("Calle 1 #1-01")
                     .celular("3001234567")
                     .documento("111")
                     .contrasena("123")
+                    .direcciones(List.of("Calle 1 #1-01"))
                     .id(UUID.randomUUID())
                     .build();
             listaPersonas.add(admin1);
@@ -114,10 +99,10 @@ public class Amazen {
                     .apellido("Martínez")
                     .email("admin2@amazen.com")
                     .telefono("0987654321")
-                    .direccion("Calle 2 #2-02")
                     .celular("3007654321")
                     .documento("222")
                     .contrasena("123")
+                    .direcciones(List.of("Calle 2 #2-02"))
                     .id(UUID.randomUUID())
                     .build();
             listaPersonas.add(admin2);
@@ -129,12 +114,12 @@ public class Amazen {
                     .apellido("López")
                     .email("repartidor1@amazen.com")
                     .telefono("1122334455")
-                    .direccion("Calle 3 #3-03")
                     .celular("3001122334")
                     .documento("333")
                     .contrasena("123")
                     .zonaCobertura("Norte")
                     .disponibilidad(Disponibilidad.ACTIVO)
+                    .direcciones(List.of("Calle 3 #3-03"))
                     .id(UUID.randomUUID())
                     .build();
             listaPersonas.add(repartidor1);
@@ -146,12 +131,12 @@ public class Amazen {
                     .apellido("Ramírez")
                     .email("repartidor2@amazen.com")
                     .telefono("2233445566")
-                    .direccion("Calle 4 #4-04")
                     .celular("3002233445")
                     .documento("444")
                     .contrasena("123")
                     .zonaCobertura("Sur")
                     .disponibilidad(Disponibilidad.INACTIVO)
+                    .direcciones(List.of("Calle 4 #4-04"))
                     .id(UUID.randomUUID())
                     .build();
             listaPersonas.add(repartidor2);
@@ -163,10 +148,10 @@ public class Amazen {
                     .apellido("Pérez")
                     .email("cliente1@amazen.com")
                     .telefono("3344556677")
-                    .direccion("Calle 5 #5-05")
                     .celular("3003344556")
                     .documento("555")
                     .contrasena("123")
+                    .direcciones(List.of("Calle 5 #5-05"))
                     .id(UUID.randomUUID())
                     .build();
             listaPersonas.add(cliente1);
@@ -178,10 +163,10 @@ public class Amazen {
                     .apellido("Gómez")
                     .email("cliente2@amazen.com")
                     .telefono("4455667788")
-                    .direccion("Calle 6 #6-06")
                     .celular("3004455667")
                     .documento("666")
                     .contrasena("123")
+                    .direcciones(List.of("Calle 6 #6-06"))
                     .id(UUID.randomUUID())
                     .build();
             listaPersonas.add(cliente2);
@@ -190,9 +175,6 @@ public class Amazen {
         System.out.println("🔥 Datos quemados cargados en memoria (" + listaPersonas.size() + " personas)");
     }
 
-    /**
-     * ✅ Guarda los datos actuales (incluidos los quemados) en sus archivos correspondientes.
-     */
     private void guardarDatosInicialesEnArchivos() {
         for (Persona persona : listaPersonas) {
             guardarPersonaEnArchivo(persona);
@@ -200,17 +182,13 @@ public class Amazen {
         System.out.println("💾 Datos guardados en archivos correctamente.");
     }
 
-    // === MÉTODOS DEL HISTORIAL ===
-
     public List<Pedido> getListaPedidos() {
         List<Pedido> base = historialPedido.getPedidos();
         return base == null ? List.of() : Collections.unmodifiableList(base);
     }
 
     public void addPedido(Pedido pedido) {
-        if (pedido == null) {
-            throw new IllegalArgumentException("Pedido requerido");
-        }
+        if (pedido == null) throw new IllegalArgumentException("Pedido requerido");
         historialPedido.agregarPedido(pedido);
     }
 
