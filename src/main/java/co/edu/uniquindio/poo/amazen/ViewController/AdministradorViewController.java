@@ -13,6 +13,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +28,7 @@ public class AdministradorViewController {
     @FXML private TextField txtApellido;
     @FXML private TextField txtEmail;
     @FXML private TextField txtTelefono;
-    @FXML private TextField txtDireccion; // Ahora permite múltiples direcciones separadas por coma
+    @FXML private TextField txtDireccion; // múltiples direcciones separadas por coma
     @FXML private TextField txtCelular;
     @FXML private PasswordField txtContrasena;
 
@@ -38,6 +39,7 @@ public class AdministradorViewController {
     // Sección Disponibilidad (Repartidor)
     @FXML private HBox hbxDisponibilidad;
     @FXML private ComboBox<String> cmbDisponibilidad;
+    @FXML private Button btnCambiarDisponibilidad;
 
     // Tabla y columnas
     @FXML private TableView<Persona> tblPersonas;
@@ -51,19 +53,23 @@ public class AdministradorViewController {
     @FXML private TableColumn<Persona, String> colCargo;
     @FXML private TableColumn<Persona, String> colDisponibilidad;
 
-    // Botones CRUD
+    // Botones CRUD + navegación
     @FXML private Button btnCrear;
     @FXML private Button btnActualizar;
     @FXML private Button btnEliminar;
     @FXML private Button btnLimpiar;
+    @FXML private Button btnLoginTest;
+    @FXML private Button botonVolver;
 
     private final AdministradorController controller = new AdministradorController();
     private final ObservableList<Persona> personasView = FXCollections.observableArrayList();
 
+    // ========================================================
+    // INIT
+    // ========================================================
     @FXML
     public void initialize() {
-        // Inicializar singleton
-        Amazen.getInstance();
+        Amazen.getInstance(); // fuerza carga de datos demo
 
         // Configurar columnas
         colDocumento.setCellValueFactory(c -> new SimpleStringProperty(nvl(c.getValue().getDocumento())));
@@ -95,7 +101,7 @@ public class AdministradorViewController {
         tblPersonas.setItems(personasView);
         tblPersonas.setPlaceholder(new Label("No hay personas para mostrar"));
 
-        // Estado base de secciones
+        // Estado base
         setDisponibilidadSection(false, null);
         setZonaVisible(false);
 
@@ -121,20 +127,17 @@ public class AdministradorViewController {
 
             if (sel instanceof Administrador) {
                 cmbRol.setValue("Administrador");
-                setCrudEnabled(true);
                 setDisponibilidadSection(false, null);
                 setZonaVisible(false);
 
             } else if (sel instanceof Repartidor rep) {
                 cmbRol.setValue("Repartidor");
-                setCrudEnabled(true);
                 setDisponibilidadSection(true, rep);
                 setZonaVisible(true);
                 txtZona.setText(nvl(rep.getZonaCobertura()));
 
             } else { // Usuario
                 cmbRol.setValue("Usuario");
-                setCrudEnabled(true);
                 setDisponibilidadSection(false, null);
                 setZonaVisible(false);
             }
@@ -146,7 +149,7 @@ public class AdministradorViewController {
             boolean isRepartidor = "Repartidor".equals(rol);
             setZonaVisible(isRepartidor);
             setDisponibilidadSection(isRepartidor, null);
-            if (isRepartidor && cmbDisponibilidad != null && cmbDisponibilidad.getItems().isEmpty()) {
+            if (isRepartidor && cmbDisponibilidad.getItems().isEmpty()) {
                 cmbDisponibilidad.getItems().setAll("ACTIVO", "INACTIVO", "EN_RUTA");
                 cmbDisponibilidad.setValue("INACTIVO");
             }
@@ -155,8 +158,9 @@ public class AdministradorViewController {
         setCrudEnabled(true);
     }
 
-    // ======= CRUD =======
-
+    // ========================================================
+    // CRUD
+    // ========================================================
     @FXML
     private void onCrear() {
         try {
@@ -238,7 +242,8 @@ public class AdministradorViewController {
                 );
             } else if (seleccionado instanceof Repartidor) {
                 String zona = nullIfBlank(txtZona.getText());
-                Disponibilidad disp = cmbDisponibilidad.getValue() != null ? Disponibilidad.valueOf(cmbDisponibilidad.getValue()) : null;
+                Disponibilidad disp = cmbDisponibilidad.getValue() != null ?
+                        Disponibilidad.valueOf(cmbDisponibilidad.getValue()) : null;
                 controller.actualizarRepartidor(doc,
                         nullIfBlank(txtNombre.getText()),
                         nullIfBlank(txtApellido.getText()),
@@ -282,6 +287,56 @@ public class AdministradorViewController {
     }
 
     @FXML
+    private void onLimpiar() {
+        limpiarFormulario();
+    }
+
+    // ========================================================
+    // Handlers que faltaban en el FXML
+    // ========================================================
+    @FXML
+    private void onLoginTest() {
+        info("Login test", "Aquí iría la lógica para probar login (placeholder).");
+    }
+
+    @FXML
+    private void onVolver() {
+        // Por ahora solo cerrar la ventana de administración
+        Stage stage = (Stage) botonVolver.getScene().getWindow();
+        stage.close();
+    }
+
+    @FXML
+    private void onAbrirEnvios() {
+        info("Gestión de envíos", "Aquí se abriría la ventana de gestión de envíos.");
+    }
+
+    @FXML
+    private void onAbrirDashboard() {
+        info("Métricas", "Aquí se abriría el panel de métricas del administrador.");
+    }
+
+    @FXML
+    private void onCambiarDisponibilidad() {
+        Persona seleccionado = tblPersonas.getSelectionModel().getSelectedItem();
+        if (!(seleccionado instanceof Repartidor rep)) {
+            error("Acción inválida", "Selecciona un repartidor en la tabla.");
+            return;
+        }
+        String valor = cmbDisponibilidad.getValue();
+        if (valor == null || valor.isBlank()) {
+            error("Campo vacío", "Selecciona una disponibilidad.");
+            return;
+        }
+        rep.setDisponibilidad(Disponibilidad.valueOf(valor));
+        tblPersonas.refresh();
+        info("Disponibilidad", "Nueva disponibilidad: " + valor);
+    }
+
+    // ========================================================
+    // Helpers
+    // ========================================================
+    @FXML
     private void limpiarFormulario() {
         txtDocumento.clear();
         txtNombre.clear();
@@ -293,11 +348,11 @@ public class AdministradorViewController {
         txtContrasena.clear();
         txtZona.clear();
         cmbRol.getSelectionModel().clearSelection();
+        cmbDisponibilidad.getSelectionModel().clearSelection();
         setDisponibilidadSection(false, null);
         setZonaVisible(false);
+        tblPersonas.getSelectionModel().clearSelection();
     }
-
-    // ======= Helpers =======
 
     private List<String> getDirecciones(TextField tf) {
         String v = tf.getText() == null ? "" : tf.getText().trim();
@@ -324,8 +379,8 @@ public class AdministradorViewController {
 
     private String getCargo(Persona p) {
         if (p instanceof Administrador) return "Administrador";
-        if (p instanceof Repartidor) return "Repartidor";
-        if (p instanceof Usuario) return "Usuario";
+        if (p instanceof Repartidor)    return "Repartidor";
+        if (p instanceof Usuario)       return "Usuario";
         return "Desconocido";
     }
 
@@ -350,12 +405,20 @@ public class AdministradorViewController {
     private void setZonaVisible(boolean visible) {
         lblZona.setVisible(visible);
         txtZona.setVisible(visible);
+        lblZona.setManaged(visible);
+        txtZona.setManaged(visible);
     }
 
     private void setDisponibilidadSection(boolean visible, Repartidor rep) {
         hbxDisponibilidad.setVisible(visible);
-        if (visible && rep != null) {
-            cmbDisponibilidad.setValue(rep.getDisponibilidad().name());
+        hbxDisponibilidad.setManaged(visible);
+        if (visible) {
+            if (cmbDisponibilidad.getItems().isEmpty()) {
+                cmbDisponibilidad.getItems().setAll("ACTIVO", "INACTIVO", "EN_RUTA");
+            }
+            if (rep != null && rep.getDisponibilidad() != null) {
+                cmbDisponibilidad.setValue(rep.getDisponibilidad().name());
+            }
         }
     }
 }
