@@ -36,6 +36,11 @@ public class EstadoEmpaquetado implements EstadoPedido {
     }
 
     @Override
+    public void cancelar() {
+        throw new IllegalStateException("❌ No se puede cancelar un pedido que ya está empaquetado.");
+    }
+
+    @Override
     public void ejecutarAccion(String accion) {
         switch (accion.toLowerCase()) {
             case "pagar" -> pagar();
@@ -43,6 +48,7 @@ public class EstadoEmpaquetado implements EstadoPedido {
             case "empaquetado" -> Empaquetado();
             case "enviado" -> Enviado();
             case "entregado" -> Entregado();
+            case "cancelado" -> cancelar();
             default -> throw new IllegalArgumentException("⚠️ Acción no válida: " + accion);
         }
     }

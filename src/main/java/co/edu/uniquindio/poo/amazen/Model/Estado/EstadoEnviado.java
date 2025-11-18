@@ -32,7 +32,12 @@ public class EstadoEnviado implements EstadoPedido {
     @Override
     public void Entregado() {
         System.out.println("🎉 Pedido entregado al cliente.");
-        pedido.cambiarEstado(new EstadoEntregado(pedido)); // 🔹 Cambia al siguiente estado
+        pedido.cambiarEstado(new EstadoEntregado(pedido));
+    }
+
+    @Override
+    public void cancelar() {
+        throw new IllegalStateException("❌ No se puede cancelar el pedido ya fue Enviado.");
     }
 
 
@@ -44,6 +49,7 @@ public class EstadoEnviado implements EstadoPedido {
             case "empaquetado" -> Empaquetado();
             case "enviado" -> Enviado();
             case "entregado" -> Entregado();
+            case "cancelado" -> cancelar();
             default -> throw new IllegalArgumentException("⚠️ Acción no válida: " + accion);
         }
     }

@@ -35,6 +35,12 @@ public class EstadoEntregado implements EstadoPedido {
     }
 
     @Override
+    public void cancelar() {
+        System.out.println("❌ Pedido cancelado correctamente.");
+        pedido.cambiarEstado(new EstadoCancelado(pedido));
+    }
+
+    @Override
     public void ejecutarAccion(String accion) {
         switch (accion.toLowerCase()) {
             case "pagar" -> pagar();

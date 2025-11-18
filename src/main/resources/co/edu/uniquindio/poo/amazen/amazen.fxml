@@ -7,7 +7,7 @@
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="co.edu.uniquindio.poo.amazen.ViewController.AmazenViewController"
-            stylesheets="@Assets/styles.css"
+            stylesheets="@../../../../../Assets/styles.css"
             prefHeight="520" prefWidth="720"
             style="-fx-background-color: linear-gradient(to bottom right, #ffffff, #eef5ff);">
 

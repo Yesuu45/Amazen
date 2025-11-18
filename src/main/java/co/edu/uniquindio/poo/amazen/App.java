@@ -9,14 +9,21 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        // La carga de datos demo ya la hace Amazen en su singleton, no hace falta aquí
-
-        final String fxml = "/co/edu/uniquindio/poo/amazen/login.fxml";
+        // FXML inicial (login)
+        final String fxml = "login.fxml"; // mismo paquete que App
         FXMLLoader loader = new FXMLLoader(App.class.getResource(fxml));
+
         Scene scene = new Scene(loader.load(), 700, 500);
 
-        primaryStage.setTitle("Login");
+        // 🔥 Hoja de estilos global (glassmorphism, botones, etc.)
+        scene.getStylesheets().add(
+                App.class.getResource("/Assets/styles.css").toExternalForm()
+        );
+
+        primaryStage.setTitle("Amazen - Login");
+        primaryStage.setResizable(false);     // opcional: bloquear redimensionado
         primaryStage.setScene(scene);
+        primaryStage.centerOnScreen();        // centrar en la pantalla
         primaryStage.show();
     }
 

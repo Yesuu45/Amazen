@@ -16,7 +16,8 @@
             </padding>
             <children>
                 <Button fx:id="btnVolver" text="← Volver" onAction="#onVolver"/>
-                <Label text="Historial de envíos" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+                <Label text="Historial de envíos"
+                       style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
                 <Label fx:id="lblUsuario" text="Usuario: —" />
             </children>
         </HBox>
@@ -37,10 +38,18 @@
     </center>
 
     <bottom>
-        <Label fx:id="lblResumen" text="0 pedidos encontrados.">
+        <VBox spacing="6">
             <padding>
                 <Insets top="8" right="10" bottom="8" left="10"/>
             </padding>
-        </Label>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Button fx:id="btnCancelar"
+                        text="Cancelar pedido seleccionado"
+                        onAction="#onCancelarPedido"/>
+            </HBox>
+
+            <Label fx:id="lblResumen" text="0 pedidos encontrados."/>
+        </VBox>
     </bottom>
 </BorderPane>

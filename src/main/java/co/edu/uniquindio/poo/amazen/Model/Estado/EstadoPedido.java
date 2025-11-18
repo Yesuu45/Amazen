@@ -6,5 +6,6 @@ public interface EstadoPedido {
     void Empaquetado();
     void Enviado();
     void Entregado();
+    void cancelar();
     void ejecutarAccion(String accion);
 }

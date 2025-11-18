@@ -36,6 +36,12 @@ public class EstadoPagado implements EstadoPedido {
     }
 
     @Override
+    public void cancelar() {
+        System.out.println("⛔ Pedido cancelado antes de ser procesado.");
+        pedido.cambiarEstado(new EstadoCancelado(pedido));
+    }
+
+    @Override
     public void ejecutarAccion(String accion) {
         switch (accion.toLowerCase()) {
             case "pagar" -> pagar();
@@ -43,6 +49,7 @@ public class EstadoPagado implements EstadoPedido {
             case "empaquetado" -> Empaquetado();
             case "enviado" -> Enviado();
             case "entregado" -> Entregado();
+            case "cancelado" -> cancelar();    // 🔹 NUEVO
             default -> throw new IllegalArgumentException("⚠️ Acción no válida: " + accion);
         }
     }

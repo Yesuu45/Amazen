@@ -96,6 +96,7 @@ public class Pedido {
     public void empaquetar()    { if (estado != null) estado.Empaquetado(); }
     public void enviar()        { if (estado != null) estado.Enviado(); }
     public void entregar()      { if (estado != null) estado.Entregado(); }
+    public void cancelar()      { if (estado != null) estado.cancelar(); }
 
     // ============================================================
     // 🔹 RF-012 Datos adicionales
