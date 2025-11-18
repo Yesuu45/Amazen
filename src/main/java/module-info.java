@@ -16,6 +16,8 @@ module co.edu.uniquindio.poo.amazen {
 
     // Si usas AWT/Swing en algún sitio (opcional)
     requires java.desktop;
+    requires jdk.jsobject;
+    requires javafx.web;
 
     // Exports si otras capas usan estas APIs
     exports co.edu.uniquindio.poo.amazen;

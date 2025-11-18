@@ -166,7 +166,7 @@ public class Amazen {
                     .celular("3004455667")
                     .documento("666")
                     .contrasena("123")
-                    .direcciones(List.of("Calle 6 #6-06"))
+                    .direcciones(List.of("cr 40 #42-16"))
                     .id(UUID.randomUUID())
                     .build();
             listaPersonas.add(cliente2);
