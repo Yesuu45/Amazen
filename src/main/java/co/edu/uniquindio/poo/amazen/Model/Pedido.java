@@ -16,6 +16,9 @@ public class Pedido {
     private CarritoDeCompras carrito;
     private EstadoPedido estado;
 
+    // ⭐ Cliente dueño del pedido (documento del usuario que compra)
+    private String documentoCliente;
+
     // RF-012: trazabilidad
     private String documentoRepartidorAsignado;  // null si no ha sido asignado
     private LocalDateTime fechaCreacion;
@@ -26,27 +29,47 @@ public class Pedido {
     // Prueba de entrega (DTO)
     private ConfirmacionEntregaDTO confirmacionEntrega;
 
+    // ============================================================
+    // 🔹 CONSTRUCTORES
+    // ============================================================
+
+    /** Constructor original (2 parámetros) */
     public Pedido(String id, CarritoDeCompras carrito) {
         this.id = id;
         this.carrito = carrito;
-        this.estado = new EstadoPagado(this); // inicial según tu flujo
+        this.estado = new EstadoPagado(this); // estado inicial
         this.fechaCreacion = LocalDateTime.now();
     }
 
-    // ===== Getters / Setters =====
+    /** ⭐ NUEVO CONSTRUCTOR (3 parámetros: incluye documentoCliente) */
+    public Pedido(String id, CarritoDeCompras carrito, String documentoCliente) {
+        this(id, carrito);           // reutiliza el constructor principal
+        this.documentoCliente = documentoCliente;
+    }
+
+    // ============================================================
+    // 🔹 GETTERS / SETTERS
+    // ============================================================
+
     public String getId() { return id; }
     public CarritoDeCompras getCarrito() { return carrito; }
     public EstadoPedido getEstado() { return estado; }
+
+    // Cliente que hizo el pedido
+    public String getDocumentoCliente() { return documentoCliente; }
+    public void setDocumentoCliente(String documentoCliente) { this.documentoCliente = documentoCliente; }
 
     public String getDocumentoRepartidorAsignado() { return documentoRepartidorAsignado; }
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
     public LocalDateTime getFechaAsignacion() { return fechaAsignacion; }
     public LocalDateTime getFechaEntrega() { return fechaEntrega; }
     public List<Incidencia> getIncidencias() { return incidencias; }
-
     public ConfirmacionEntregaDTO getConfirmacionEntrega() { return confirmacionEntrega; }
 
-    // ===== State =====
+    // ============================================================
+    // 🔹 STATE - Cambios de estado y flujo
+    // ============================================================
+
     public void cambiarEstado(EstadoPedido nuevoEstado) {
         if (nuevoEstado == null) throw new IllegalArgumentException("El nuevo estado no puede ser null.");
         this.estado = nuevoEstado;
@@ -67,15 +90,20 @@ public class Pedido {
         }
     }
 
-    // ===== Flujo resumido por métodos directos (opcional) =====
+    // Métodos directos (atajos)
     public void pagar()         { if (estado != null) estado.pagar(); }
     public void verificarPago() { if (estado != null) estado.VerificacionPago(); }
     public void empaquetar()    { if (estado != null) estado.Empaquetado(); }
     public void enviar()        { if (estado != null) estado.Enviado(); }
     public void entregar()      { if (estado != null) estado.Entregado(); }
 
-    // ===== Datos de operación RF-012 =====
-    public double calcularTotal() { return carrito != null ? carrito.calcularTotal() : 0.0; }
+    // ============================================================
+    // 🔹 RF-012 Datos adicionales
+    // ============================================================
+
+    public double calcularTotal() {
+        return carrito != null ? carrito.calcularTotal() : 0.0;
+    }
 
     public void asignarRepartidor(String documentoRepartidor) {
         if (documentoRepartidor == null || documentoRepartidor.isBlank()) {
@@ -94,15 +122,20 @@ public class Pedido {
     public void confirmarEntrega(ConfirmacionEntregaDTO dto) {
         if (dto == null) throw new IllegalArgumentException("Confirmación requerida");
         this.confirmacionEntrega = dto;
-        // Si por alguna razón el state no cambió, lo forzamos
         if (!(estado instanceof EstadoEntregado)) {
             cambiarEstado(new EstadoEntregado(this));
         }
     }
 
+    // ============================================================
+    // 🔹 toString()
+    // ============================================================
+
     @Override
     public String toString() {
-        return "Pedido " + id + " | Estado: " + (estado != null ? estado.toString() : "—") +
+        return "Pedido " + id +
+                " | Cliente: " + (documentoCliente == null ? "—" : documentoCliente) +
+                " | Estado: " + (estado != null ? estado.toString() : "—") +
                 " | Repartidor: " + (documentoRepartidorAsignado == null ? "—" : documentoRepartidorAsignado);
     }
 }

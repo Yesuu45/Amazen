@@ -83,7 +83,7 @@ public class AdminEnviosViewController {
         setInfo("Listo.");
     }
 
-    // ====== acciones toolbar ======
+    // ====== accxiones toolbar ======
 
     @FXML
     private void onRefrescar() {

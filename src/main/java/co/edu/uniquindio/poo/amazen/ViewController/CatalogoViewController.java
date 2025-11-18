@@ -9,6 +9,11 @@ import co.edu.uniquindio.poo.amazen.Model.Strategy.EstrategiaCatalogoAdmin;
 import co.edu.uniquindio.poo.amazen.Model.Strategy.EstrategiaCatalogoUsuario;
 import co.edu.uniquindio.poo.amazen.Model.Strategy.EstrategiaVistaCatalogo;
 import co.edu.uniquindio.poo.amazen.Model.TiendaSession;
+
+// RF-003
+import co.edu.uniquindio.poo.amazen.Model.PrioridadEnvio;
+import co.edu.uniquindio.poo.amazen.Service.CotizadorEnvioService;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -32,20 +37,16 @@ public class CatalogoViewController {
     @FXML private TableColumn<Producto, String>  colNombre;
     @FXML private TableColumn<Producto, Double> colPrecio;
     @FXML private TableColumn<Producto, Boolean> colDisponible;
-
-    // NUEVO: columnas de peso y volumen
     @FXML private TableColumn<Producto, Double> colPeso;
     @FXML private TableColumn<Producto, Double> colVolumen;
 
-    // =================== CAMPOS ===================
+    // =================== CAMPOS PRODUCTO ===================
     @FXML private TextField txtId;
     @FXML private TextField txtNombre;
     @FXML private TextField txtPrecio;
-    @FXML private CheckBox chkDisponible;
-
-    // NUEVO: campos de peso y volumen
     @FXML private TextField txtPeso;
     @FXML private TextField txtVolumen;
+    @FXML private CheckBox chkDisponible;
 
     // =================== BUSQUEDA / CANTIDAD ===================
     @FXML private TextField txtBuscar;
@@ -60,8 +61,23 @@ public class CatalogoViewController {
     @FXML private Button btnLimpiar;
     @FXML private Button botonVolver;
 
-    // =================== PANELES ===================
+    // =================== PANEL AGREGAR ===================
     @FXML private TitledPane panelAgregarProducto;
+
+    // =================== RF-003: ENVÍO PRODUCTO SELECCIONADO ===================
+    @FXML private TextField txtOrigenEnvio;
+    @FXML private TextField txtDestinoEnvio;
+    @FXML private ComboBox<PrioridadEnvio> cmbPrioridadEnvio;
+    @FXML private Label lblResumenEnvio;
+    @FXML private Button btnCotizarEnvio;
+
+    // =================== RF-003: PAQUETE LIBRE ===================
+    @FXML private TextField txtOrigenPaquete;
+    @FXML private TextField txtDestinoPaquete;
+    @FXML private TextField txtPesoPaquete;
+    @FXML private TextField txtVolumenPaquete;
+    @FXML private ComboBox<PrioridadEnvio> cmbPrioridadPaquete;
+    @FXML private Label lblResumenPaquete;
 
     // =================== CONTROLADORES ===================
     private ProductoController productoController;
@@ -79,24 +95,36 @@ public class CatalogoViewController {
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colPrecio.setCellValueFactory(new PropertyValueFactory<>("precio"));
         colDisponible.setCellValueFactory(new PropertyValueFactory<>("disponible"));
-
-        // NUEVO: pesoKg y volumenCm3
-        if (colPeso != null) {
-            colPeso.setCellValueFactory(new PropertyValueFactory<>("pesoKg"));
-        }
-        if (colVolumen != null) {
-            colVolumen.setCellValueFactory(new PropertyValueFactory<>("volumenCm3"));
-        }
+        colPeso.setCellValueFactory(new PropertyValueFactory<>("pesoKg"));
+        colVolumen.setCellValueFactory(new PropertyValueFactory<>("volumenCm3"));
 
         // Cargar productos iniciales
         datosTabla = FXCollections.observableArrayList(productoController.obtenerTodos());
         tablaProductos.setItems(datosTabla);
 
-        // ===== Aplicar estrategia según usuario =====
+        // Estrategia según rol
         if (TiendaSession.getInstance().esAdministrador()) {
             setEstrategiaVistaCatalogo(new EstrategiaCatalogoAdmin());
         } else {
             setEstrategiaVistaCatalogo(new EstrategiaCatalogoUsuario());
+        }
+
+        // Config RF-003 para producto seleccionado
+        if (cmbPrioridadEnvio != null) {
+            cmbPrioridadEnvio.getItems().setAll(PrioridadEnvio.values());
+            cmbPrioridadEnvio.setValue(PrioridadEnvio.NORMAL);
+        }
+        if (txtOrigenEnvio != null) {
+            txtOrigenEnvio.setText("Armenia");
+        }
+
+        // Config RF-003 para paquete libre
+        if (cmbPrioridadPaquete != null) {
+            cmbPrioridadPaquete.getItems().setAll(PrioridadEnvio.values());
+            cmbPrioridadPaquete.setValue(PrioridadEnvio.NORMAL);
+        }
+        if (txtOrigenPaquete != null) {
+            txtOrigenPaquete.setText("Armenia");
         }
     }
 
@@ -129,7 +157,7 @@ public class CatalogoViewController {
         }
     }
 
-    // ================= ACCIONES =================
+    // ================= ACCIONES BÁSICAS =================
     @FXML
     private void buscarProducto() {
         String nombre = txtBuscar.getText().trim();
@@ -163,8 +191,8 @@ public class CatalogoViewController {
         String id = txtId.getText().trim();
         String nombre = txtNombre.getText().trim();
         String precioStr = txtPrecio.getText().trim();
-        String pesoStr = txtPeso != null ? txtPeso.getText().trim() : "";
-        String volumenStr = txtVolumen != null ? txtVolumen.getText().trim() : "";
+        String pesoStr = txtPeso.getText().trim();
+        String volumenStr = txtVolumen.getText().trim();
         boolean disponible = chkDisponible.isSelected();
 
         if (id.isEmpty() || nombre.isEmpty() || precioStr.isEmpty()) {
@@ -208,15 +236,183 @@ public class CatalogoViewController {
         txtId.clear();
         txtNombre.clear();
         txtPrecio.clear();
-        if (txtPeso != null) txtPeso.clear();
-        if (txtVolumen != null) txtVolumen.clear();
+        txtPeso.clear();
+        txtVolumen.clear();
         chkDisponible.setSelected(false);
         txtBuscar.clear();
-        txtCantidad.setText("1");
+        if (txtCantidad != null) txtCantidad.setText("1");
         tablaProductos.getSelectionModel().clearSelection();
     }
 
-    // =================== BOTÓN VOLVER ===================
+    // ================= RF-003: COTIZAR ENVÍO (PRODUCTO SELECCIONADO) =================
+    @FXML
+    private void cotizarEnvioSeleccion() {
+        Producto seleccionado = tablaProductos.getSelectionModel().getSelectedItem();
+        if (seleccionado == null) {
+            mostrarAlerta("Selecciona un producto", "Debes seleccionar un producto para cotizar el envío.");
+            return;
+        }
+
+        int cantidad = leerCantidad();
+        if (cantidad <= 0) {
+            mostrarAlerta("Cantidad inválida", "La cantidad debe ser mayor que cero.");
+            return;
+        }
+
+        String origen = txtOrigenEnvio.getText() == null ? "" : txtOrigenEnvio.getText().trim();
+        String destino = txtDestinoEnvio.getText() == null ? "" : txtDestinoEnvio.getText().trim();
+        PrioridadEnvio prioridad = cmbPrioridadEnvio.getValue();
+
+        if (origen.isEmpty() || destino.isEmpty()) {
+            mostrarAlerta("Datos incompletos", "Ingresa origen y dirección/destino del envío.");
+            return;
+        }
+        if (prioridad == null) {
+            mostrarAlerta("Prioridad requerida", "Selecciona una prioridad de envío.");
+            return;
+        }
+
+        double pesoTotal = seleccionado.getPesoKg() * cantidad;
+        double volumenTotal = seleccionado.getVolumenCm3() * cantidad;
+
+        double tarifa = CotizadorEnvioService.cotizar(
+                origen,
+                destino,
+                pesoTotal,
+                volumenTotal,
+                prioridad
+        );
+
+        String resumen = String.format(
+                "Origen: %s\nDestino: %s\nPrioridad: %s\n\n" +
+                        "Producto: %s x%d\n" +
+                        "Peso total: %.2f kg\nVolumen total: %.0f cm³\n\n" +
+                        "Tarifa estimada de envío: $%.0f",
+                origen, destino, prioridad,
+                seleccionado.getNombre(), cantidad,
+                pesoTotal, volumenTotal, tarifa
+        );
+
+        if (lblResumenEnvio != null) {
+            lblResumenEnvio.setText("Tarifa estimada: $" + String.format("%.0f", tarifa));
+        }
+
+        mostrarInfo("Cotización de envío", resumen);
+    }
+
+    // ===== Helper para paquete libre =====
+    private static class CotizacionPaquete {
+        String origen;
+        String destino;
+        PrioridadEnvio prioridad;
+        double peso;
+        double volumen;
+        double tarifa;
+    }
+
+    private CotizacionPaquete calcularCotizacionPaquete() {
+        String origen  = txtOrigenPaquete == null ? "" : txtOrigenPaquete.getText().trim();
+        String destino = txtDestinoPaquete == null ? "" : txtDestinoPaquete.getText().trim();
+        String pesoStr = txtPesoPaquete == null ? "" : txtPesoPaquete.getText().trim();
+        String volStr  = txtVolumenPaquete == null ? "" : txtVolumenPaquete.getText().trim();
+        PrioridadEnvio prioridad = (cmbPrioridadPaquete != null) ? cmbPrioridadPaquete.getValue() : null;
+
+        if (origen.isEmpty() || destino.isEmpty() || pesoStr.isEmpty() || volStr.isEmpty()) {
+            mostrarAlerta("Datos incompletos",
+                    "Ingresa origen, destino, peso (kg) y volumen (cm³) para cotizar el paquete.");
+            return null;
+        }
+
+        double peso;
+        double volumen;
+        try {
+            peso = Double.parseDouble(pesoStr);
+            volumen = Double.parseDouble(volStr);
+            if (peso <= 0 || volumen <= 0) {
+                mostrarAlerta("Valores inválidos", "Peso y volumen deben ser mayores que cero.");
+                return null;
+            }
+        } catch (NumberFormatException e) {
+            mostrarAlerta("Valores inválidos", "Peso y volumen deben ser números válidos.");
+            return null;
+        }
+
+        if (prioridad == null) {
+            prioridad = PrioridadEnvio.NORMAL;
+        }
+
+        double tarifa = CotizadorEnvioService.cotizar(
+                origen,
+                destino,
+                peso,
+                volumen,
+                prioridad
+        );
+
+        CotizacionPaquete c = new CotizacionPaquete();
+        c.origen = origen;
+        c.destino = destino;
+        c.prioridad = prioridad;
+        c.peso = peso;
+        c.volumen = volumen;
+        c.tarifa = tarifa;
+        return c;
+    }
+
+    // ================= RF-003: COTIZAR ENVÍO (PAQUETE LIBRE) =================
+    @FXML
+    private void onCotizarPaqueteLibre() {
+        CotizacionPaquete c = calcularCotizacionPaquete();
+        if (c == null) return;
+
+        String resumen = String.format(
+                "Origen: %s\nDestino: %s\nPrioridad: %s\n\n" +
+                        "Peso: %.2f kg\nVolumen: %.0f cm³\n\n" +
+                        "Tarifa estimada de envío: $%.0f",
+                c.origen, c.destino, c.prioridad,
+                c.peso, c.volumen, c.tarifa
+        );
+
+        if (lblResumenPaquete != null) {
+            lblResumenPaquete.setText("Tarifa estimada: $" + String.format("%.0f", c.tarifa));
+        }
+
+        mostrarInfo("Cotización de paquete", resumen);
+    }
+
+    // ================= RF-003: AGREGAR PAQUETE LIBRE AL CARRITO =================
+    @FXML
+    private void onAgregarPaqueteAlCarrito() {
+        CotizacionPaquete c = calcularCotizacionPaquete();
+        if (c == null) return;
+
+        // Producto "virtual" solo para representar el envío en el carrito
+        String id = "ENV-" + System.currentTimeMillis();
+        String nombre = "Envío paquete " + c.origen + " → " + c.destino;
+
+        Producto envio = new Producto(
+                id,
+                nombre,
+                c.tarifa,     // el precio del producto es la tarifa del envío
+                true,
+                c.peso,
+                c.volumen
+        );
+
+        carrito.agregarProducto(envio, 1);
+
+        if (lblResumenPaquete != null) {
+            lblResumenPaquete.setText("Tarifa agregada: $" + String.format("%.0f", c.tarifa));
+        }
+
+        mostrarInfo(
+                "Paquete agregado al carrito",
+                "Se agregó al carrito el envío cotizado:\n\n" +
+                        nombre + "\nTarifa: $" + String.format("%.0f", c.tarifa)
+        );
+    }
+
+    // ================= BOTÓN VOLVER =================
     @FXML
     void onVolver() {
         try {
@@ -232,10 +428,11 @@ public class CatalogoViewController {
 
     // ================= UTILIDADES =================
     private int leerCantidad() {
+        if (txtCantidad == null) return 1;
         try {
             return Integer.parseInt(txtCantidad.getText().trim());
         } catch (NumberFormatException e) {
-            return -1;
+            return 1;
         }
     }
 

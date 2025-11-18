@@ -4,35 +4,45 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CarritoDeCompras {
+
     private List<DetallePedido> detalles;
 
     public CarritoDeCompras() {
-        detalles = new ArrayList<>();
-    }
-
-    public void agregarProducto(Producto producto, int cantidad) {
-        for (int i = 0; i < detalles.size(); i++) {
-            DetallePedido d = detalles.get(i);
-            if (d.getProducto().getId().equals(producto.getId())) {
-                d.setCantidad(d.getCantidad() + cantidad);
-                return;
-            }
-        }
-        detalles.add(new DetallePedido(producto, cantidad));
+        this.detalles = new ArrayList<>();
     }
 
     public List<DetallePedido> getDetalles() {
         return detalles;
     }
 
-    public double calcularTotal() {
-        double total = 0;
-        for (int i = 0; i < detalles.size(); i++) {
-            total += detalles.get(i).getSubtotal();
-        }
-        return total;
+    // Agregar productos al carrito
+    public void agregarProducto(Producto producto, int cantidad) {
+        detalles.add(new DetallePedido(producto, cantidad));
     }
 
-    public void vaciar() {
-        detalles.clear(); }
+    // Calcular subtotal total
+    public double calcularTotal() {
+        return detalles.stream()
+                .mapToDouble(DetallePedido::getSubtotal)
+                .sum();
+    }
+
+    // ==========================================================
+    // 🔥 NECESARIOS PARA RF-003 (COTIZACIÓN DE ENVÍO)
+    // ==========================================================
+
+    /** Calcula el peso TOTAL del carrito */
+    public double calcularPesoTotal() {
+        return detalles.stream()
+                .mapToDouble(d -> d.getProducto().getPesoKg() * d.getCantidad())
+                .sum();
+    }
+
+    /** Calcula el volumen TOTAL del carrito */
+    public double calcularVolumenTotal() {
+        return detalles.stream()
+                .mapToDouble(d -> d.getProducto().getVolumenCm3() * d.getCantidad())
+                .sum();
+    }
+
 }

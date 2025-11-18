@@ -70,7 +70,30 @@ public class AmazenViewController {
     @FXML private void irAlCarrito()   { cambiarEscena("/co/edu/uniquindio/poo/amazen/carrito.fxml", botonCarrito); }
     @FXML private void irAlHistorial() { cambiarEscena("/co/edu/uniquindio/poo/amazen/historial.fxml", botonHistorial); }
     @FXML private void irAlEstado()    { cambiarEscena("/co/edu/uniquindio/poo/amazen/estado.fxml", botonEstado); }
-    @FXML private void irAGestionAdmin() { cambiarEscena("/co/edu/uniquindio/poo/amazen/Admin.fxml", botonAdmin); }
+    @FXML
+    private void irAGestionAdmin() {
+        try {
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("admin.fxml"));
+            Scene scene = new Scene(loader.load());
+
+            Stage stage = new Stage(); // usar nueva ventana
+            stage.setScene(scene);
+            stage.setTitle("Panel Administrador - Amazen");
+
+            stage.setWidth(1100);  // puedes ajustar si quieres
+            stage.setHeight(700);
+
+            stage.centerOnScreen(); // ⭐⭐ esto la centra en pantalla
+
+            stage.show();
+
+            // Cerrar la ventana actual
+            ((Stage) botonAdmin.getScene().getWindow()).close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     // ================= CERRAR SESIÓN =================
     @FXML

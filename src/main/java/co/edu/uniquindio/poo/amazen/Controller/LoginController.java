@@ -5,6 +5,7 @@ import co.edu.uniquindio.poo.amazen.Model.Persona.*;
 import co.edu.uniquindio.poo.amazen.Service.*;
 
 import java.util.List;
+import java.util.Objects;
 
 public class LoginController {
 
@@ -16,7 +17,7 @@ public class LoginController {
         // 1️⃣ Buscar en memoria (Amazen)
         Persona persona = amazen.buscarPersonaPorDocumento(documento);
 
-        if (persona != null && persona.getContrasena().equals(contrasena)) {
+        if (persona != null && Objects.equals(persona.getContrasena(), contrasena)) {
             usuarioActivo = persona;
             SesionUsuario.instancia().iniciarSesion(persona);
             System.out.println("✅ Sesión iniciada (memoria): " + persona.getNombre());
@@ -32,6 +33,7 @@ public class LoginController {
         System.out.println("❌ Credenciales incorrectas");
         return false;
     }
+
 
     private boolean buscarEnArchivos(String documento, String contrasena) {
         // Administradores
