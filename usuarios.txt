@@ -1,6 +1,0 @@
-a1f3c19b-3f60-4c78-8d31-9bd6c2e7d111,Camilo,Ruiz,camilo.ruiz@amazen.com,3105678901,3005678901,Carrera 10 #12-34,1010,123
-b4e5d2a7-8f21-4d9a-93f8-7c9d1123c222,Laura,Morales,laura.morales@amazen.com,3156789012,3016789012,Calle 45 #9-20,2020,123
-c7a9f8d3-1b4c-4b99-8277-0de3456ab333,David,Castaño,david.castano@amazen.com,3167890123,3027890123,Transversal 18 #22-18,3030,123
-dd21fa77-4cd2-4b6a-9f44-92bb3312d444,Mariana,Lozano,mariana.lozano@amazen.com,3178901234,3038901234,Avenida 3N #7-55,4040,123
-e8bc43f1-56d9-49ac-a999-71ff9ab5e555,Sergio,Quintero,sergio.quintero@amazen.com,3189012345,3049012345,Calle 8 #15-40,5050,123
-f9d3a8bb-7e22-4fcf-9b44-8cfe77bbf666,Valentina,Arango,valentina.arango@amazen.com,3190123456,3050123456,Carrera 21 #30-10,6060
