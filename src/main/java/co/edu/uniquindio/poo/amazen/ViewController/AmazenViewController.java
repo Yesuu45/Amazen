@@ -198,7 +198,7 @@ public class AmazenViewController {
     @FXML
     private void irGestionPerfil() {
         try {
-            FXMLLoader loader = new FXMLLoader(App.class.getResource("GestionUsuarios.fxml"));
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("GestionUsuario.fxml"));
             Parent root = loader.load();
 
             Stage stage = (Stage) botonGestionPerfil.getScene().getWindow();
