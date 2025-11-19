@@ -6,7 +6,12 @@ import co.edu.uniquindio.poo.amazen.Model.Producto;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Encapsula la lógica de negocio para consultar, buscar,
+ * clonar y agregar productos al inventario.
+ */
 public class ProductoController {
+
     private final Inventario inventario;
 
     public ProductoController(Inventario inventario) {
@@ -14,14 +19,20 @@ public class ProductoController {
     }
 
     /**
-     * Retorna todos los productos disponibles en el inventario.
+     * Obtiene todos los productos presentes en el inventario.
+     *
+     * @return lista completa de productos
      */
     public List<Producto> obtenerTodos() {
         return inventario.obtenerProductos();
     }
 
     /**
-     * Busca productos por nombre (coincidencia parcial, sin importar mayúsculas/minúsculas).
+     * Busca productos por nombre, usando coincidencia parcial e ignorando mayúsculas.
+     * Si el nombre es vacío o nulo, devuelve todos los productos.
+     *
+     * @param nombre criterio de búsqueda
+     * @return lista de productos que coinciden
      */
     public List<Producto> buscarPorNombre(String nombre) {
         List<Producto> resultados = new ArrayList<>();
@@ -40,7 +51,10 @@ public class ProductoController {
     }
 
     /**
-     * Clona un producto, asignándole un nuevo ID generado automáticamente.
+     * Clona un producto existente asignándole un nuevo ID generado por el inventario.
+     *
+     * @param original producto a clonar
+     * @return clon creado o null si no se pudo clonar
      */
     public Producto clonarProducto(Producto original) {
         if (original == null) return null;
@@ -55,12 +69,14 @@ public class ProductoController {
     }
 
     /**
-     * Agrega un nuevo producto al inventario, si el ID no está repetido.
+     * Agrega un producto al inventario, validando que el ID no exista previamente.
+     *
+     * @param producto producto a agregar
+     * @return true si se agregó correctamente
      */
     public boolean agregarProducto(Producto producto) {
         if (producto == null || producto.getId() == null) return false;
 
-        // Verificar duplicados
         for (Producto existente : inventario.obtenerProductos()) {
             if (existente.getId().equalsIgnoreCase(producto.getId())) {
                 System.out.println("⚠️ Ya existe un producto con el ID: " + producto.getId());

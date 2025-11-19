@@ -4,17 +4,25 @@ import co.edu.uniquindio.poo.amazen.Model.Amazen;
 import co.edu.uniquindio.poo.amazen.Model.Persona.Usuario;
 import co.edu.uniquindio.poo.amazen.Service.UsuarioFileService;
 
+/**
+ * Gestiona el registro de nuevos usuarios en archivos
+ * y en la instancia central de {@link Amazen}.
+ */
 public class RegistroController {
 
+    /**
+     * Registra un usuario nuevo si su documento no existe.
+     * Persiste en archivo y en memoria.
+     *
+     * @param usuario usuario a registrar
+     * @return true si el registro fue exitoso, false si ya existía el documento
+     */
     public boolean registrarUsuario(Usuario usuario) {
         if (UsuarioFileService.existeUsuario(usuario.getDocumento())) {
-            return false; // ya existe
+            return false;
         }
 
-        // ✅ Guarda en el archivo
         UsuarioFileService.guardarUsuario(usuario);
-
-        // ✅ Agrega también al sistema Amazen (en memoria)
         Amazen.getInstance().agregarPersona(usuario);
 
         System.out.println("✅ Usuario registrado: " + usuario.getNombre());

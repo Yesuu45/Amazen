@@ -22,26 +22,92 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Controlador de la vista de historial de pedidos.
+ *
+ * <p>Responsabilidades principales:</p>
+ * <ul>
+ *     <li>Configurar y poblar la tabla de pedidos históricos.</li>
+ *     <li>Filtrar los pedidos visibles según el rol del usuario en sesión:
+ *         <ul>
+ *             <li><b>Administrador</b> / <b>Repartidor</b>: pueden ver todos los pedidos.</li>
+ *             <li><b>Usuario</b> final: solo ve los pedidos asociados a su documento.</li>
+ *         </ul>
+ *     </li>
+ *     <li>Permitir la cancelación de un pedido desde la interfaz, delegando la lógica
+ *         al patrón State implementado en {@link Pedido#cancelar()}.</li>
+ *     <li>Permitir volver al panel principal (amazen.fxml).</li>
+ * </ul>
+ *
+ * <p>Este controlador se apoya en el singleton {@link HistorialPedido} como fuente
+ * centralizada de pedidos registrados.</p>
+ */
 public class HistorialViewController {
 
+    // ================== FXML: TABLA Y COLUMNAS ==================
+
+    /** Tabla que muestra los pedidos del historial. */
     @FXML private TableView<Pedido> tablaPedidos;
+
+    /** Columna que muestra el identificador único del pedido. */
     @FXML private TableColumn<Pedido, String> colId;
+
+    /** Columna que muestra el estado actual del pedido (EstadoPedido.toString()). */
     @FXML private TableColumn<Pedido, String> colEstado;
+
+    /** Columna que muestra el total a pagar del pedido (formateado sin decimales). */
     @FXML private TableColumn<Pedido, String> colTotal;
+
+    /** Columna que muestra la fecha y hora de creación del pedido. */
     @FXML private TableColumn<Pedido, String> colCreacion;
+
+    /** Columna que muestra la fecha y hora de asignación de repartidor (si aplica). */
     @FXML private TableColumn<Pedido, String> colAsignacion;
+
+    /** Columna que muestra la fecha y hora de entrega al cliente (si aplica). */
     @FXML private TableColumn<Pedido, String> colEntrega;
+
+    /** Columna que muestra el documento del repartidor asignado (si aplica). */
     @FXML private TableColumn<Pedido, String> colRepartidor;
 
+    // ================== FXML: CONTROLES DE ACCIÓN ==================
+
+    /** Botón para volver al panel principal. */
     @FXML private Button btnVolver;
+
+    /** Botón para solicitar cancelación del pedido seleccionado. */
     @FXML private Button btnCancelar;
+
+    /** Etiqueta que muestra información breve del usuario en sesión. */
     @FXML private Label  lblUsuario;
+
+    /** Etiqueta que muestra un resumen de la cantidad de pedidos listados. */
     @FXML private Label  lblResumen;
 
+    // ================== MODELO Y FORMATOS ==================
+
+    /** Fuente de datos de historial (singleton compartido). */
     private final HistorialPedido historial = HistorialPedido.getInstance();
+
+    /** Lista observable que alimenta la tabla de pedidos. */
     private final ObservableList<Pedido> datos = FXCollections.observableArrayList();
+
+    /** Formato de fecha y hora usado para mostrar marcas temporales. */
     private final DateTimeFormatter fmtFechaHora = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
+    // ================== CICLO DE VIDA DE LA VISTA ==================
+
+    /**
+     * Inicializa la vista de historial.
+     *
+     * <p>Se encarga de:</p>
+     * <ul>
+     *     <li>Configurar las columnas de la tabla y sus {@code cellValueFactory}.</li>
+     *     <li>Asignar la lista observable {@link #datos} como items de la tabla.</li>
+     *     <li>Cargar los pedidos visibles para el usuario actual mediante
+     *         {@link #cargarPedidosUsuarioActual()}.</li>
+     * </ul>
+     */
     @FXML
     private void initialize() {
         // Configurar columnas
@@ -84,8 +150,20 @@ public class HistorialViewController {
         cargarPedidosUsuarioActual();
     }
 
-    // ================== Carga de datos ==================
+    // ================== CARGA / FILTRO DE PEDIDOS ==================
 
+    /**
+     * Carga en la tabla los pedidos visibles para la persona actualmente en sesión.
+     *
+     * <p>Lógica de filtrado:</p>
+     * <ul>
+     *     <li>Si no hay sesión activa: no se muestran pedidos y se deshabilita el botón cancelar.</li>
+     *     <li>Si el usuario es {@link Administrador} o {@link Repartidor}:
+     *         se cargan todos los pedidos.</li>
+     *     <li>Si es un {@link co.edu.uniquindio.poo.amazen.Model.Persona.Usuario Usuario}:
+     *         solo se cargan aquellos cuyo documento de cliente coincide con el suyo.</li>
+     * </ul>
+     */
     private void cargarPedidosUsuarioActual() {
         Persona persona = SesionUsuario.instancia().getPersona();
 
@@ -116,8 +194,15 @@ public class HistorialViewController {
         btnCancelar.setDisable(datos.isEmpty());
     }
 
-    // ================== Cancelar pedido ==================
+    // ================== CANCELAR PEDIDO ==================
 
+    /**
+     * Devuelve el pedido actualmente seleccionado en la tabla.
+     *
+     * <p>Si no hay selección, muestra una advertencia y retorna {@code null}.</p>
+     *
+     * @return pedido seleccionado o {@code null} si no se seleccionó ninguno.
+     */
     private Pedido pedidoSeleccionado() {
         Pedido p = tablaPedidos.getSelectionModel().getSelectedItem();
         if (p == null) {
@@ -127,6 +212,21 @@ public class HistorialViewController {
         return p;
     }
 
+    /**
+     * Acción del botón "Cancelar pedido".
+     *
+     * <p>Pasos:</p>
+     * <ol>
+     *     <li>Obtiene el pedido mediante {@link #pedidoSeleccionado()}.</li>
+     *     <li>Muestra un cuadro de confirmación al usuario.</li>
+     *     <li>Si confirma, invoca {@link Pedido#cancelar()} para delegar en el patrón State.</li>
+     *     <li>Refresca la tabla y actualiza el resumen.</li>
+     *     <li>Muestra un mensaje de éxito o error según corresponda.</li>
+     * </ol>
+     *
+     * <p>La lógica de validación (si es posible cancelar o no) reside en
+     * la implementación del estado del {@link Pedido}.</p>
+     */
     @FXML
     private void onCancelarPedido() {
         Pedido pedido = pedidoSeleccionado();
@@ -143,7 +243,7 @@ public class HistorialViewController {
         }
 
         try {
-            // Usa el patrón State (EstadoPagado / EstadoVerificarPago)
+            // Usa el patrón State (EstadoPagado / EstadoVerificarPago, etc.)
             pedido.cancelar();
 
             tablaPedidos.refresh();
@@ -157,8 +257,14 @@ public class HistorialViewController {
         }
     }
 
-    // ================== Volver ==================
+    // ================== NAVEGACIÓN: VOLVER ==================
 
+    /**
+     * Acción del botón "Volver".
+     *
+     * <p>Cambia la escena actual para volver al panel principal de la aplicación
+     * (amazen.fxml), reutilizando la ventana actual ({@link Stage}).</p>
+     */
     @FXML
     private void onVolver() {
         try {
@@ -174,8 +280,15 @@ public class HistorialViewController {
         }
     }
 
-    // ================== Helper alertas ==================
+    // ================== UTILIDADES: ALERTAS ==================
 
+    /**
+     * Muestra un cuadro de diálogo simple (información, advertencia o error).
+     *
+     * @param tipo    tipo de alerta (INFORMATION, WARNING, ERROR, etc.).
+     * @param titulo  título de la ventana de diálogo.
+     * @param mensaje contenido principal a mostrar al usuario.
+     */
     private void alerta(Alert.AlertType tipo, String titulo, String mensaje) {
         Alert a = new Alert(tipo, mensaje, ButtonType.OK);
         a.setTitle(titulo);

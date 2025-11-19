@@ -25,61 +25,120 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Controlador JavaFX para la vista de administración de personas.
+ * <p>
+ * Desde este panel el administrador puede:
+ * <ul>
+ *     <li>Crear, actualizar y eliminar {@link Administrador}, {@link Usuario} y {@link Repartidor}.</li>
+ *     <li>Gestionar la disponibilidad de los repartidores.</li>
+ *     <li>Probar el inicio de sesión con documento/contraseña para validar credenciales.</li>
+ *     <li>Abrir el panel de gestión de envíos y el panel de métricas (dashboard).</li>
+ * </ul>
+ * Los datos se obtienen y persisten a través del modelo principal {@link Amazen}
+ * y del controlador de dominio {@link AdministradorController}.
+ */
 public class AdministradorViewController {
 
     // ======= Campos de formulario =======
+
+    /** Combo para seleccionar el rol de la persona a crear/editar (Administrador, Usuario, Repartidor). */
     @FXML private ComboBox<String> cmbRol;
+    /** Documento de la persona. Actúa como identificador principal. */
     @FXML private TextField txtDocumento;
+    /** Nombre de la persona. */
     @FXML private TextField txtNombre;
+    /** Apellido de la persona. */
     @FXML private TextField txtApellido;
+    /** Correo electrónico de contacto. */
     @FXML private TextField txtEmail;
+    /** Teléfono fijo de contacto. */
     @FXML private TextField txtTelefono;
+    /** Direcciones (una o varias, separadas por comas). */
     @FXML private TextField txtDireccion; // múltiples direcciones separadas por coma
+    /** Número de celular de contacto. */
     @FXML private TextField txtCelular;
+    /** Contraseña para autenticación en el sistema. */
     @FXML private PasswordField txtContrasena;
 
     // Solo Repartidor
+
+    /** Etiqueta "Zona" (visible solo cuando el rol es Repartidor). */
     @FXML private Label lblZona;
+    /** Zona de cobertura del repartidor. */
     @FXML private TextField txtZona;
 
     // Sección Disponibilidad (Repartidor)
+
+    /** Contenedor HBox de la sección de disponibilidad (solo repartidores). */
     @FXML private HBox hbxDisponibilidad;
+    /** Combo para seleccionar la disponibilidad de un repartidor. */
     @FXML private ComboBox<String> cmbDisponibilidad;
+    /** Botón para aplicar un cambio de disponibilidad a un repartidor seleccionado. */
     @FXML private Button btnCambiarDisponibilidad;
 
     // Tabla y columnas
+
+    /** Tabla que lista todas las personas registradas en el sistema. */
     @FXML private TableView<Persona> tblPersonas;
+    /** Columna: documento de la persona. */
     @FXML private TableColumn<Persona, String> colDocumento;
+    /** Columna: nombre de la persona. */
     @FXML private TableColumn<Persona, String> colNombre;
+    /** Columna: apellido de la persona. */
     @FXML private TableColumn<Persona, String> colApellido;
+    /** Columna: correo electrónico de la persona. */
     @FXML private TableColumn<Persona, String> colEmail;
+    /** Columna: teléfono fijo de la persona. */
     @FXML private TableColumn<Persona, String> colTelefono;
+    /** Columna: celular de la persona. */
     @FXML private TableColumn<Persona, String> colCelular;
+    /** Columna: direcciones de la persona en formato de texto. */
     @FXML private TableColumn<Persona, String> colDireccion;
+    /** Columna: cargo/rol de la persona (Administrador, Usuario, Repartidor). */
     @FXML private TableColumn<Persona, String> colCargo;
+    /** Columna: disponibilidad actual (solo aplica a repartidores). */
     @FXML private TableColumn<Persona, String> colDisponibilidad;
 
     // Botones CRUD
+
+    /** Botón para crear una nueva persona. */
     @FXML private Button btnCrear;
+    /** Botón para actualizar los datos de la persona seleccionada. */
     @FXML private Button btnActualizar;
+    /** Botón para eliminar la persona seleccionada. */
     @FXML private Button btnEliminar;
+    /** Botón para limpiar el formulario. */
     @FXML private Button btnLimpiar;
 
     // Botones extra de la vista
+
+    /** Botón para probar el login con documento/contraseña. */
     @FXML private Button btnLoginTest;
+    /** Botón para volver al panel principal de la aplicación. */
     @FXML private Button botonVolver;
 
+    /** Controlador de dominio específico para las operaciones de administración. */
     private final AdministradorController controller = new AdministradorController();
+    /** Controlador de login, usado en la prueba de inicio de sesión. */
     private final LoginController loginController = new LoginController();
+    /** Lista observable que respalda la tabla de personas. */
     private final ObservableList<Persona> personasView = FXCollections.observableArrayList();
 
 
+    /**
+     * Inicializa la vista una vez cargado el FXML.
+     * <p>
+     * Configura las columnas de la tabla, inicializa el singleton {@link Amazen},
+     * carga las personas existentes, configura los roles disponibles y
+     * gestiona el comportamiento de selección de filas.
+     */
     @FXML
     public void initialize() {
         // Inicializar singleton
         Amazen.getInstance();
 
-        // Configurar columnas
+        // Configurar columnas de la tabla
         colDocumento.setCellValueFactory(c -> new SimpleStringProperty(nvl(c.getValue().getDocumento())));
         colNombre.setCellValueFactory(c -> new SimpleStringProperty(nvl(c.getValue().getNombre())));
         colApellido.setCellValueFactory(c -> new SimpleStringProperty(nvl(c.getValue().getApellido())));
@@ -104,16 +163,16 @@ public class AdministradorViewController {
             }
         });
 
-        // Poblar tabla
+        // Poblar tabla con las personas del modelo
         personasView.setAll(Amazen.getInstance().getListaPersonas());
         tblPersonas.setItems(personasView);
         tblPersonas.setPlaceholder(new Label("No hay personas para mostrar"));
 
-        // Estado base de secciones
+        // Estado base de secciones (zona/disponibilidad ocultas)
         setDisponibilidadSection(false, null);
         setZonaVisible(false);
 
-        // Listener de selección
+        // Listener de selección de filas en la tabla
         tblPersonas.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, sel) -> {
             if (sel == null) {
                 setCrudEnabled(true);
@@ -124,6 +183,7 @@ public class AdministradorViewController {
                 return;
             }
 
+            // Cargar datos de la persona seleccionada en el formulario
             txtDocumento.setText(nvl(sel.getDocumento()));
             txtNombre.setText(nvl(sel.getNombre()));
             txtApellido.setText(nvl(sel.getApellido()));
@@ -154,7 +214,7 @@ public class AdministradorViewController {
             }
         });
 
-        // Roles disponibles
+        // Roles disponibles en el combo
         cmbRol.getItems().setAll("Administrador", "Usuario", "Repartidor");
         cmbRol.valueProperty().addListener((obs, oldV, rol) -> {
             boolean isRepartidor = "Repartidor".equals(rol);
@@ -171,6 +231,13 @@ public class AdministradorViewController {
 
     // ======= CRUD =======
 
+    /**
+     * Acción del botón "Crear".
+     * <p>
+     * Según el rol seleccionado en {@link #cmbRol}, crea un nuevo Administrador,
+     * Usuario o Repartidor usando el {@link AdministradorController}. Valida
+     * los campos requeridos y actualiza la tabla tras la creación.
+     */
     @FXML
     private void onCrear() {
         try {
@@ -224,6 +291,7 @@ public class AdministradorViewController {
                 default -> throw new IllegalArgumentException("Rol no soportado: " + rol);
             }
 
+            // Refrescar tabla y limpiar formulario
             personasView.setAll(Amazen.getInstance().getListaPersonas());
             tblPersonas.refresh();
             limpiarFormulario();
@@ -233,6 +301,12 @@ public class AdministradorViewController {
         }
     }
 
+    /**
+     * Acción del botón "Actualizar".
+     * <p>
+     * Actualiza parcialmente los datos de la persona seleccionada. Sólo se envían
+     * al controlador los campos que no están en blanco (nullIfBlank).
+     */
     @FXML
     private void onActualizar() {
         try {
@@ -286,11 +360,22 @@ public class AdministradorViewController {
         }
     }
 
+    /**
+     * Acción del botón "Limpiar".
+     * <p>
+     * Limpia todos los campos del formulario y devuelve la vista al estado inicial.
+     */
     @FXML
     private void onLimpiar() {
         limpiarFormulario();
     }
 
+    /**
+     * Acción del botón "Eliminar".
+     * <p>
+     * Elimina la persona actualmente seleccionada en la tabla usando el
+     * {@link AdministradorController}, refrescando luego la vista.
+     */
     @FXML
     private void onEliminar() {
         Persona seleccionado = tblPersonas.getSelectionModel().getSelectedItem();
@@ -301,6 +386,9 @@ public class AdministradorViewController {
         limpiarFormulario();
     }
 
+    /**
+     * Limpia los campos del formulario y oculta secciones específicas de repartidor.
+     */
     @FXML
     private void limpiarFormulario() {
         txtDocumento.clear();
@@ -319,7 +407,9 @@ public class AdministradorViewController {
 
     // ======= BOTONES EXTRA DE LA VISTA =======
 
-    // Volver al panel principal (amazen.fxml)
+    /**
+     * Vuelve al panel principal (amazen.fxml) en la misma ventana.
+     */
     @FXML
     private void onVolver() {
         try {
@@ -332,7 +422,9 @@ public class AdministradorViewController {
         }
     }
 
-    // Abrir gestión de envíos en una nueva ventana
+    /**
+     * Abre la ventana de gestión de envíos (admin_envios.fxml) en un nuevo {@link Stage}.
+     */
     @FXML
     private void onAbrirEnvios() {
         try {
@@ -348,7 +440,12 @@ public class AdministradorViewController {
         }
     }
 
-    // Abrir panel de métricas en una nueva ventana
+    /**
+     * Abre el panel de métricas (admin_dashboard.fxml) en una nueva ventana.
+     * <p>
+     * Configura un tamaño recomendado para visualizar adecuadamente las gráficas
+     * y centra la ventana en pantalla.
+     */
     @FXML
     private void onAbrirDashboard() {
         try {
@@ -377,7 +474,10 @@ public class AdministradorViewController {
         }
     }
 
-    // Cambiar solo la disponibilidad del repartidor seleccionado
+    /**
+     * Cambia únicamente la disponibilidad del repartidor seleccionado en la tabla,
+     * utilizando el valor actual del combo {@link #cmbDisponibilidad}.
+     */
     @FXML
     private void onCambiarDisponibilidad() {
         Persona seleccionado = tblPersonas.getSelectionModel().getSelectedItem();
@@ -410,7 +510,13 @@ public class AdministradorViewController {
         }
     }
 
-    // Botón "Probar Login (doc/clave)" – sin romper la lógica real de login
+    /**
+     * Prueba el inicio de sesión usando el documento y la contraseña ingresados
+     * en el formulario, sin alterar el flujo normal de login de la aplicación.
+     * <p>
+     * Útil para que el administrador verifique si las credenciales almacenadas
+     * para una persona son correctas.
+     */
     @FXML
     private void onLoginTest() {
         String doc = txtDocumento.getText();
@@ -446,6 +552,13 @@ public class AdministradorViewController {
 
     // ======= Helpers =======
 
+    /**
+     * Convierte el contenido del {@link TextField} de direcciones en una lista
+     * de cadenas, separadas por comas.
+     *
+     * @param tf campo de texto con direcciones separadas por comas
+     * @return lista de direcciones limpias (sin espacios sobrantes)
+     */
     private List<String> getDirecciones(TextField tf) {
         String v = tf.getText() == null ? "" : tf.getText().trim();
         if (v.isBlank()) return new ArrayList<>();
@@ -455,20 +568,42 @@ public class AdministradorViewController {
                 .toList();
     }
 
+    /**
+     * Obtiene el texto de un {@link TextField} y lanza una excepción si está vacío.
+     *
+     * @param t campo de texto
+     * @return contenido sin espacios al inicio/final
+     * @throws IllegalArgumentException si el campo está vacío
+     */
     private static String getTxt(TextField t) {
         String v = t.getText() == null ? "" : t.getText().trim();
         if (v.isBlank()) throw new IllegalArgumentException("Campo requerido: " + t.getPromptText());
         return v;
     }
 
+    /**
+     * Devuelve {@code null} si la cadena es nula o está en blanco; de lo contrario la cadena recortada.
+     *
+     * @param s cadena a evaluar
+     * @return {@code null} o cadena recortada
+     */
     private static String nullIfBlank(String s) {
         if (s == null) return null;
         String t = s.trim();
         return t.isBlank() ? null : t;
     }
 
+    /**
+     * Devuelve una cadena vacía si el valor es {@code null}, o el valor original en caso contrario.
+     */
     private static String nvl(String s) { return s == null ? "" : s; }
 
+    /**
+     * Determina el rol/cargo de una {@link Persona} según su tipo concreto.
+     *
+     * @param p persona
+     * @return "Administrador", "Repartidor", "Usuario" o "Desconocido"
+     */
     private String getCargo(Persona p) {
         if (p instanceof Administrador) return "Administrador";
         if (p instanceof Repartidor) return "Repartidor";
@@ -476,6 +611,12 @@ public class AdministradorViewController {
         return "Desconocido";
     }
 
+    /**
+     * Muestra un cuadro de diálogo de información.
+     *
+     * @param titulo   título de la ventana de diálogo
+     * @param mensaje  mensaje a mostrar
+     */
     private void info(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION, mensaje, ButtonType.OK);
         alert.setTitle(titulo);
@@ -483,6 +624,12 @@ public class AdministradorViewController {
         alert.showAndWait();
     }
 
+    /**
+     * Muestra un cuadro de diálogo de error.
+     *
+     * @param titulo   título de la ventana de diálogo
+     * @param mensaje  mensaje a mostrar
+     */
     private void error(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.ERROR, mensaje, ButtonType.OK);
         alert.setTitle(titulo);
@@ -491,12 +638,22 @@ public class AdministradorViewController {
         alert.showAndWait();
     }
 
+    /**
+     * Habilita o deshabilita los botones CRUD (crear, actualizar, eliminar).
+     *
+     * @param enabled {@code true} para habilitar, {@code false} para deshabilitar
+     */
     private void setCrudEnabled(boolean enabled) {
         btnCrear.setDisable(!enabled);
         btnActualizar.setDisable(!enabled);
         btnEliminar.setDisable(!enabled);
     }
 
+    /**
+     * Muestra u oculta los campos relacionados con la zona de cobertura del repartidor.
+     *
+     * @param visible {@code true} para mostrar, {@code false} para ocultar
+     */
     private void setZonaVisible(boolean visible) {
         lblZona.setVisible(visible);
         lblZona.setManaged(visible);
@@ -504,6 +661,13 @@ public class AdministradorViewController {
         txtZona.setManaged(visible);
     }
 
+    /**
+     * Muestra u oculta la sección de disponibilidad para repartidores,
+     * y opcionalmente carga la disponibilidad actual de un repartidor concreto.
+     *
+     * @param visible indica si la sección debe estar visible
+     * @param rep     repartidor del cual se debe cargar la disponibilidad (puede ser {@code null})
+     */
     private void setDisponibilidadSection(boolean visible, Repartidor rep) {
         hbxDisponibilidad.setVisible(visible);
         hbxDisponibilidad.setManaged(visible);

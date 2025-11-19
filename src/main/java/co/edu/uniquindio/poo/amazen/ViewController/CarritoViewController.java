@@ -30,36 +30,87 @@ import javafx.util.Callback;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Controlador de la vista del carrito de compras.
+ * <p>
+ * Responsabilidades principales:
+ * <ul>
+ *     <li>Mostrar los productos agregados al carrito ({@link DetallePedido}).</li>
+ *     <li>Permitir actualizar cantidades y eliminar ítems.</li>
+ *     <li>Crear el {@link Pedido} a partir del carrito y registrarlo en el historial.</li>
+ *     <li>Gestionar el proceso de pago utilizando el patrón Strategy para los distintos métodos.</li>
+ *     <li>RF-003: Cotizar el valor del envío según origen, destino, peso, volumen y prioridad.</li>
+ * </ul>
+ * Colabora con:
+ * <ul>
+ *     <li>{@link GestorPedidosController}: creación de pedidos desde el carrito.</li>
+ *     <li>{@link HistorialController}: registro del pedido en el historial.</li>
+ *     <li>{@link TiendaSession}: obtiene el carrito actual y el cliente activo.</li>
+ * </ul>
+ */
 public class CarritoViewController {
 
+    // ===================== COMPONENTES DE LA VISTA =====================
+
+    /** Tabla principal que muestra los detalles del carrito. */
     @FXML
     private TableView<DetallePedido> tablaCarrito;
+    /** Columna que muestra el nombre del producto. */
     @FXML private TableColumn<DetallePedido, String>  columnaProducto;
+    /** Columna que muestra la cantidad solicitada. */
     @FXML private TableColumn<DetallePedido, Integer> columnaCantidad;
+    /** Columna que muestra el subtotal (cantidad x precio). */
     @FXML private TableColumn<DetallePedido, Double>  columnaSubtotal;
 
+    /** Etiqueta donde se muestra el total acumulado del carrito. */
     @FXML private Label totalLabel;
+    /** Botón para confirmar la compra y generar el pedido. */
     @FXML private Button botonRealizarPedido;
+    /** Botón para volver al panel principal Amazen. */
     @FXML private Button botonVolver;
+    /** Botón para eliminar un producto seleccionado del carrito. */
     @FXML private Button botonEliminar;
+    /** Botón para actualizar la cantidad del ítem seleccionado. */
     @FXML private Button botonActualizar;
+    /** Campo de texto para digitar la nueva cantidad del producto. */
     @FXML private TextField campoNuevaCantidad;
 
-    // OPCIONAL: si agregas un botón para cotizar en el FXML
+    /**
+     * Botón para cotizar el envío (puede ser opcional según el FXML).
+     * Implementa RF-003 a nivel de interfaz.
+     */
     @FXML private Button botonCotizarEnvio;
 
+    // ===================== MODELO Y CONTROLADORES =====================
+
+    /** Carrito de compras asociado a la sesión actual. */
     private CarritoDeCompras carrito;
+    /** Componente de negocio encargado de crear pedidos. */
     private GestorPedidosController gestor;
+    /** Controlador de historial para registrar los pedidos. */
     private HistorialController historialController;
+    /** Lista observable que respalda la tabla de detalles. */
     private ObservableList<DetallePedido> datos;
 
-    // 🧾 para mostrar en el ticket
+    // 🧾 Información del último pago para mostrar en el comprobante
     private String ultimoMetodoPago = "No especificado";
     private static final DateTimeFormatter FECHA_HORA =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public CarritoViewController() {}
 
+    /**
+     * Inicializa la vista del carrito.
+     * <p>
+     * Se ejecuta automáticamente al cargar el FXML y realiza:
+     * <ul>
+     *     <li>Obtención del carrito actual desde {@link TiendaSession}.</li>
+     *     <li>Creación de {@link GestorPedidosController} y {@link HistorialController}.</li>
+     *     <li>Configuración de las columnas de la tabla utilizando propiedades.</li>
+     *     <li>Sincronización de la tabla con el contenido del carrito.</li>
+     *     <li>Cálculo inicial del total del carrito.</li>
+     * </ul>
+     */
     @FXML
     private void initialize() {
         carrito = TiendaSession.getInstance().getCarrito();
@@ -89,6 +140,21 @@ public class CarritoViewController {
 
     // ================== RF-003: COTIZAR ENVÍO ==================
 
+    /**
+     * Acción del botón "Cotizar envío".
+     * <p>
+     * Implementa el requerimiento RF-003:
+     * <ol>
+     *     <li>Verifica que el carrito no esté vacío.</li>
+     *     <li>Obtiene el peso y volumen total del carrito
+     *         (usando {@link CarritoDeCompras#calcularPesoTotal()} y {@link CarritoDeCompras#calcularVolumenTotal()}).</li>
+     *     <li>Pide al usuario el origen y destino mediante diálogos.</li>
+     *     <li>Permite elegir la prioridad del envío ({@link PrioridadEnvio}).</li>
+     *     <li>Llama a {@link CotizadorEnvioService#cotizar(String, String, double, double, PrioridadEnvio)}
+     *         para obtener la tarifa estimada.</li>
+     *     <li>Muestra el resumen de la cotización en una alerta informativa.</li>
+     * </ol>
+     */
     @FXML
     private void cotizarEnvio() {
         if (carrito.getDetalles().isEmpty()) {
@@ -151,6 +217,21 @@ public class CarritoViewController {
 
     // ================== PEDIDO / PAGO ==================
 
+    /**
+     * Acción del botón "Realizar pedido".
+     * <p>
+     * Flujo completo:
+     * <ol>
+     *     <li>Valida que el carrito tenga productos.</li>
+     *     <li>Crea un {@link Pedido} a partir del carrito usando {@link GestorPedidosController}.</li>
+     *     <li>Registra el pedido en el historial mediante {@link HistorialController}.</li>
+     *     <li>Notifica el estado inicial del pedido.</li>
+     *     <li>Solicita al usuario el método de pago y procesa el cobro (patrón Strategy en {@link ProcesarPago}).</li>
+     *     <li>Ejecuta la transición de estado "pagar" sobre el pedido (patrón State).</li>
+     *     <li>Genera y muestra un comprobante de pago con datos del cliente y del pedido.</li>
+     *     <li>Actualiza el total mostrado del carrito.</li>
+     * </ol>
+     */
     @FXML
     private void realizarPedido() {
         if (carrito.getDetalles().isEmpty()) {
@@ -216,7 +297,17 @@ public class CarritoViewController {
     }
 
     /**
-     * Ahora es de instancia (ya no static) para poder guardar ultimoMetodoPago.
+     * Construye un {@link ProcesarPago} configurando el método concreto
+     * según la selección del usuario.
+     * <p>
+     * Implementa el patrón Strategy:
+     * <ul>
+     *     <li>Cada implementación de {@link MetodoPago} encapsula la lógica de cobro.</li>
+     *     <li>El usuario elige "Efectivo", "Tarjeta", "PayPal" o "Pasarela Externa".</li>
+     *     <li>Se guarda el nombre del método en {@link #ultimoMetodoPago} para el comprobante.</li>
+     * </ul>
+     *
+     * @return instancia de {@link ProcesarPago} lista para ejecutar el pago.
      */
     private ProcesarPago getProcesarPago() {
         ChoiceDialog<String> dialog = new ChoiceDialog<>("Efectivo", "Efectivo", "Tarjeta", "PayPal", "Pasarela Externa");
@@ -249,6 +340,17 @@ public class CarritoViewController {
 
     // ================== CRUD CARRITO ==================
 
+    /**
+     * Elimina del carrito el {@link DetallePedido} actualmente seleccionado en la tabla.
+     * <p>
+     * Controla:
+     * <ul>
+     *     <li>Que exista una fila seleccionada.</li>
+     *     <li>Sincronización de la lista observable con el carrito.</li>
+     *     <li>Re-cálculo del total.</li>
+     *     <li>Mensaje informativo con el nombre del producto eliminado.</li>
+     * </ul>
+     */
     @FXML
     private void eliminarProducto() {
         DetallePedido seleccionado = tablaCarrito.getSelectionModel().getSelectedItem();
@@ -262,6 +364,17 @@ public class CarritoViewController {
         mostrarInfo("Eliminado", "Se eliminó " + seleccionado.getProducto().getNombre() + " del carrito.");
     }
 
+    /**
+     * Actualiza la cantidad del producto seleccionado tomando el valor
+     * digitado en {@link #campoNuevaCantidad}.
+     * <p>
+     * Validaciones:
+     * <ul>
+     *     <li>Debe haber un producto seleccionado.</li>
+     *     <li>La cantidad debe ser un entero mayor que cero.</li>
+     * </ul>
+     * Si es correcto, actualiza el modelo, refresca la tabla y recalcula el total.
+     */
     @FXML
     private void actualizarCantidad() {
         DetallePedido seleccionado = tablaCarrito.getSelectionModel().getSelectedItem();
@@ -282,6 +395,12 @@ public class CarritoViewController {
 
     // ================== NAVEGACIÓN ==================
 
+    /**
+     * Acción del botón "Volver".
+     * <p>
+     * Regresa al panel principal Amazen ({@code amazen.fxml}) dentro de la
+     * misma ventana actual.
+     */
     @FXML
     private void onVolver() {
         try {
@@ -299,6 +418,11 @@ public class CarritoViewController {
 
     // ================== HELPERS ==================
 
+    /**
+     * Intenta leer la cantidad desde {@link #campoNuevaCantidad}.
+     *
+     * @return la cantidad como entero, o -1 si ocurre un error de parseo.
+     */
     private int leerCantidad() {
         try {
             return Integer.parseInt(campoNuevaCantidad.getText().trim());
@@ -307,10 +431,20 @@ public class CarritoViewController {
         }
     }
 
+    /**
+     * Recalcula el total del carrito usando {@link CarritoDeCompras#calcularTotal()}
+     * y actualiza la etiqueta {@link #totalLabel}.
+     */
     private void actualizarTotal() {
         totalLabel.setText("Total: $" + String.format("%.2f", carrito.calcularTotal()));
     }
 
+    /**
+     * Muestra una alerta de tipo WARNING sin encabezado.
+     *
+     * @param titulo título de la ventana de alerta
+     * @param msg    mensaje a mostrar
+     */
     private void mostrarAlerta(String titulo, String msg) {
         Alert a = new Alert(Alert.AlertType.WARNING);
         a.setTitle(titulo);
@@ -319,6 +453,12 @@ public class CarritoViewController {
         a.showAndWait();
     }
 
+    /**
+     * Muestra una alerta de tipo INFORMATION sin encabezado.
+     *
+     * @param titulo título de la ventana de alerta
+     * @param msg    mensaje a mostrar
+     */
     private void mostrarInfo(String titulo, String msg) {
         Alert a = new Alert(Alert.AlertType.INFORMATION);
         a.setTitle(titulo);

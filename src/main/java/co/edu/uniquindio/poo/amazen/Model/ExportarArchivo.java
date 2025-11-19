@@ -8,14 +8,17 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 /**
- * Clase usada por compatibilidad para el trabajo.
- * Internamente usa DTOs y un servicio de exportación.
+ * Adaptador para exportar pedidos a archivo de texto.
+ * Mantiene compatibilidad con la firma requerida por el trabajo.
  */
 public class ExportarArchivo {
 
     /**
-     * Exporta un pedido a TXT.
-     * Mantiene la firma original para no romper llamadas existentes.
+     * Exporta un pedido a un archivo TXT.
+     *
+     * @param pedido        pedido a exportar
+     * @param rutaArchivoTxt ruta del archivo destino
+     * @throws IOException si ocurre un error de E/S
      */
     public static void exportarPedido(Pedido pedido, String rutaArchivoTxt) throws IOException {
         if (pedido == null) throw new IllegalArgumentException("Pedido requerido");
