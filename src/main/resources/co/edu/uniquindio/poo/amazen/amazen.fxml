@@ -7,8 +7,9 @@
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="co.edu.uniquindio.poo.amazen.ViewController.AmazenViewController"
+            stylesheets="@../../../../../Assets/styles.css"
             prefHeight="520" prefWidth="720"
-            style="-fx-background-color: linear-gradient(to bottom right, #f2f2f2, #d9e4f5);">
+            style="-fx-background-color: linear-gradient(to bottom right, #ffffff, #eef5ff);">
 
     <children>
 
@@ -17,63 +18,72 @@
                 text="Cerrar Sesión"
                 onAction="#cerrarSesion"
                 layoutX="600" layoutY="20"
-                style="-fx-background-color: #ff4d4d; -fx-text-fill: white;
-                       -fx-font-weight: bold; -fx-background-radius: 8;"
-                prefWidth="100" prefHeight="35"/>
+                styleClass="button-basic button-red"
+                prefWidth="110" prefHeight="35"/>
 
-        <!-- Contenedor principal -->
-        <VBox layoutX="160" layoutY="50" spacing="30" alignment="CENTER" prefWidth="400" prefHeight="420">
+        <!-- TARJETA PRINCIPAL GLASMORPHISM -->
+        <VBox layoutX="160" layoutY="50"
+              spacing="30" alignment="CENTER"
+              prefWidth="400" prefHeight="420"
+              styleClass="glass-card-light">
 
-            <!-- TÍTULO DINÁMICO -->
+            <!-- TITULO -->
             <Label fx:id="tituloLabel"
                    text="Bienvenido a Amazen"
-                   style="-fx-font-weight: bold; -fx-text-fill: #2a2a2a;"
-                   alignment="CENTER">
+                   alignment="CENTER"
+                   styleClass="title-label-light">
                 <font>
-                    <Font name="Arial Bold" size="28"/>
+                    <Font name="Segoe UI Bold" size="26"/>
                 </font>
             </Label>
 
-            <!-- BOTONES PRINCIPALES -->
-            <VBox spacing="20" alignment="CENTER">
-                <Button fx:id="botonCatalogo" text="Ir al Catálogo" onAction="#irAlCatalogo"
-                        style="-fx-background-color: #ffcc00; -fx-text-fill: #2a2a2a;
-                               -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10;"
+            <!-- BOTONES -->
+            <VBox spacing="18" alignment="CENTER">
+
+                <Button fx:id="botonCatalogo"
+                        text="Ir al Catálogo"
+                        onAction="#irAlCatalogo"
+                        styleClass="button-basic button-yellow-light"
                         prefWidth="220" prefHeight="45"/>
 
-                <Button fx:id="botonCarrito" text="Ir al Carrito" onAction="#irAlCarrito"
-                        style="-fx-background-color: #00aaff; -fx-text-fill: white;
-                               -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10;"
+                <Button fx:id="botonCarrito"
+                        text="Ir al Carrito"
+                        onAction="#irAlCarrito"
+                        styleClass="button-basic button-blue-light"
                         prefWidth="220" prefHeight="45"/>
 
-                <Button fx:id="botonHistorial" text="Ver Historial" onAction="#irAlHistorial"
-                        style="-fx-background-color: #00cc66; -fx-text-fill: white;
-                               -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10;"
+                <Button fx:id="botonHistorial"
+                        text="Ver Historial"
+                        onAction="#irAlHistorial"
+                        styleClass="button-basic button-green-light"
                         prefWidth="220" prefHeight="45"/>
 
-                <Button fx:id="botonEstado" text="Ver Estado" onAction="#irAlEstado"
-                        style="-fx-background-color: #ff6666; -fx-text-fill: white;
-                               -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10;"
+                <Button fx:id="botonEstado"
+                        text="Ver Estado"
+                        onAction="#irAlEstado"
+                        styleClass="button-basic button-red-light"
                         prefWidth="220" prefHeight="45"/>
 
                 <Button fx:id="botonAdmin"
                         text="Gestión Admin"
                         onAction="#irAGestionAdmin"
-                        visible="false" disable="true"/>
-
-                <Button fx:id="botonMisEnvios" text="Mis envíos" onAction="#irPanelRepartidor"
-                        style="-fx-background-color: #9966ff; -fx-text-fill: white;
-                               -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10;"
+                        visible="false" disable="true"
+                        styleClass="button-basic button-purple-light"
                         prefWidth="220" prefHeight="45"/>
 
-                <!-- NUEVO BOTÓN GESTIONAR PERFIL -->
-                <Button fx:id="botonGestionPerfil" text="Gestionar Perfil" onAction="#irGestionPerfil"
-                        style="-fx-background-color: #ffaa33; -fx-text-fill: white;
-                               -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10;"
+                <Button fx:id="botonMisEnvios"
+                        text="Mis envíos"
+                        onAction="#irPanelRepartidor"
+                        styleClass="button-basic button-purple-light"
+                        prefWidth="220" prefHeight="45"/>
+
+                <Button fx:id="botonGestionPerfil"
+                        text="Gestionar Perfil"
+                        onAction="#irGestionPerfil"
+                        styleClass="button-basic button-orange-light"
                         prefWidth="220" prefHeight="45"/>
             </VBox>
 
         </VBox>
     </children>
 </AnchorPane>
-

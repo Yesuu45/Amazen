@@ -1,15 +1,32 @@
 package co.edu.uniquindio.poo.amazen.Model;
 
+/**
+ * Representa una dirección georreferenciada con latitud y longitud.
+ */
 public class Direccion {
+
     private double latitud;
     private double longitud;
     private String nombre;
 
+    /**
+     * Crea una dirección solo con coordenadas.
+     *
+     * @param latitud  latitud en grados
+     * @param longitud longitud en grados
+     */
     public Direccion(double latitud, double longitud) {
         this.latitud = latitud;
         this.longitud = longitud;
     }
 
+    /**
+     * Crea una dirección con coordenadas y nombre.
+     *
+     * @param latitud  latitud en grados
+     * @param longitud longitud en grados
+     * @param nombre   etiqueta o descripción
+     */
     public Direccion(double latitud, double longitud, String nombre) {
         this.latitud = latitud;
         this.longitud = longitud;

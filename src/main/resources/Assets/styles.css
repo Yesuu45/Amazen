@@ -1,0 +1,43 @@
+/* === TARJETA DE VIDRIO CLARA === */
+.glass-card-light {
+    -fx-background-color: rgba(255,255,255,0.35);
+    -fx-background-radius: 18;
+    -fx-padding: 25;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(255,255,255,0.45);
+    -fx-border-width: 1.2;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 18, 0.2, 0, 4);
+}
+
+/* === TÍTULO CLARO === */
+.title-label-light {
+    -fx-font-size: 24px;
+    -fx-text-fill: #333333;
+    -fx-font-weight: bold;
+}
+
+/* === BOTÓN BASE === */
+.button-basic {
+    -fx-background-radius: 12;
+    -fx-font-size: 15px;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 8, 0.3, 0, 2);
+}
+
+/* === PALETA DE COLORES PASTEL === */
+.button-yellow-light { -fx-background-color: #ffe792; -fx-text-fill: #5a4a00; }
+.button-blue-light   { -fx-background-color: #b3e0ff; -fx-text-fill: #003e66; }
+.button-green-light  { -fx-background-color: #c7f5d9; -fx-text-fill: #0b6121; }
+.button-red-light    { -fx-background-color: #ffd1d1; -fx-text-fill: #7a0000; }
+.button-orange-light { -fx-background-color: #ffd9b3; -fx-text-fill: #6b2d00; }
+.button-purple-light { -fx-background-color: #e7d6ff; -fx-text-fill: #3d1573; }
+
+/* Cerrar sesión */
+.button-red {
+    -fx-background-color: #ff4d4d;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+}

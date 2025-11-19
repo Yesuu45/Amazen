@@ -1,6 +1,10 @@
 package co.edu.uniquindio.poo.amazen.Model;
 
+/**
+ * Detalle de un pedido: producto y cantidad.
+ */
 public class DetallePedido {
+
     private Producto producto;
     private int cantidad;
 
@@ -13,6 +17,11 @@ public class DetallePedido {
     public int getCantidad() { return cantidad; }
     public void setCantidad(int cantidad) { this.cantidad = cantidad; }
 
+    /**
+     * Calcula el subtotal de este detalle.
+     *
+     * @return precio * cantidad
+     */
     public double getSubtotal() {
         return producto.getPrecio() * cantidad;
     }

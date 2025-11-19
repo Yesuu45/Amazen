@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 @SuperBuilder
-public class Repartidor extends Persona {
+public class  Repartidor extends Persona {
 
     private String zonaCobertura;
     private Disponibilidad disponibilidad;

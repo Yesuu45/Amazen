@@ -56,18 +56,21 @@
                 <!-- TABLA DE PRODUCTOS -->
                 <TableView fx:id="tablaProductos" prefHeight="330" prefWidth="820">
                     <columns>
-                        <TableColumn fx:id="colId" prefWidth="120" text="ID"/>
-                        <TableColumn fx:id="colNombre" prefWidth="320" text="Nombre"/>
-                        <TableColumn fx:id="colPrecio" prefWidth="160" text="Precio"/>
-                        <TableColumn fx:id="colDisponible" prefWidth="120" text="Disponible"/>
+                        <TableColumn fx:id="colId"         prefWidth="100" text="ID"/>
+                        <TableColumn fx:id="colNombre"     prefWidth="220" text="Nombre"/>
+                        <TableColumn fx:id="colPrecio"     prefWidth="90"  text="Precio"/>
+                        <TableColumn fx:id="colDisponible" prefWidth="90"  text="Disponible"/>
+                        <TableColumn fx:id="colPeso"       prefWidth="110" text="Peso (kg)"/>
+                        <TableColumn fx:id="colVolumen"    prefWidth="130" text="Volumen (cm³)"/>
                     </columns>
                 </TableView>
 
-                <!-- FILA DE ACCIONES -->
+                <!-- FILA DE ACCIONES (CANTIDAD / CARRITO / COTIZAR) -->
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <children>
                         <Label text="Cantidad:"/>
                         <TextField fx:id="txtCantidad" prefWidth="70" promptText="1"/>
+
                         <Button fx:id="btnAgregarCarrito" onAction="#agregarAlCarrito"
                                 style="-fx-background-color: #00cc66; -fx-text-fill: white;"
                                 text="Agregar al Carrito"/>
@@ -104,7 +107,7 @@
                 </TitledPane>
 
                 <!-- AGREGAR / EDITAR PRODUCTO (SOLO ADMIN) -->
-                <TitledPane fx:id="panelAgregarProducto" expanded="true" prefWidth="820" text="Agregar / Editar producto">
+                <TitledPane fx:id="panelAgregarProducto" expanded="false" prefWidth="820" text="Agregar / Editar producto">
                     <content>
                         <VBox spacing="10">
                             <padding>
@@ -127,8 +130,14 @@
                                         <Label text="Precio:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
                                         <TextField fx:id="txtPrecio" promptText="Ingrese precio" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
-                                        <Label text="Disponible:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                                        <CheckBox fx:id="chkDisponible" text="Sí" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                                        <Label text="Peso (kg):" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                                        <TextField fx:id="txtPeso" promptText="Ej: 1.5" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                                        <Label text="Volumen (cm³):" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                                        <TextField fx:id="txtVolumen" promptText="Ej: 1200" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+                                        <Label text="Disponible:" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+                                        <CheckBox fx:id="chkDisponible" text="Sí" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
                                     </children>
                                 </GridPane>
 
@@ -141,6 +150,99 @@
                                     </children>
                                 </HBox>
 
+                            </children>
+                        </VBox>
+                    </content>
+                </TitledPane>
+
+                <!-- RF-003: COTIZAR ENVÍO DEL PRODUCTO SELECCIONADO -->
+                <TitledPane expanded="false" prefWidth="820" text="Cotizar envío del producto seleccionado">
+                    <content>
+                        <VBox spacing="8">
+                            <padding>
+                                <Insets top="8" right="8" bottom="8" left="8"/>
+                            </padding>
+                            <children>
+                                <GridPane hgap="10" vgap="8">
+                                    <columnConstraints>
+                                        <ColumnConstraints minWidth="120" halignment="RIGHT"/>
+                                        <ColumnConstraints hgrow="ALWAYS"/>
+                                    </columnConstraints>
+                                    <children>
+                                        <Label text="Origen:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                                        <TextField fx:id="txtOrigenEnvio" promptText="Ciudad origen"
+                                                   GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                                        <Label text="Dirección / Destino:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                                        <TextField fx:id="txtDestinoEnvio" promptText="Ciudad o dirección destino"
+                                                   GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                                        <Label text="Prioridad:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                                        <ComboBox fx:id="cmbPrioridadEnvio"
+                                                  GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                                    </children>
+                                </GridPane>
+
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <children>
+                                        <Button fx:id="btnCotizarEnvio" text="Cotizar Envío"
+                                                onAction="#cotizarEnvioSeleccion"
+                                                style="-fx-background-color: #3498db; -fx-text-fill: white;"/>
+                                        <Label fx:id="lblResumenEnvio" text="Tarifa estimada: —"/>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </content>
+                </TitledPane>
+
+                <!-- RF-003: COTIZAR ENVÍO DE PAQUETE LIBRE -->
+                <TitledPane expanded="false" prefWidth="820" text="Cotizar envío de paquete (peso / volumen libre)">
+                    <content>
+                        <VBox spacing="8">
+                            <padding>
+                                <Insets top="8" right="8" bottom="8" left="8"/>
+                            </padding>
+                            <children>
+                                <GridPane hgap="10" vgap="8">
+                                    <columnConstraints>
+                                        <ColumnConstraints minWidth="120" halignment="RIGHT"/>
+                                        <ColumnConstraints hgrow="ALWAYS"/>
+                                    </columnConstraints>
+                                    <children>
+                                        <Label text="Origen:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                                        <TextField fx:id="txtOrigenPaquete" promptText="Ciudad origen"
+                                                   GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                                        <Label text="Destino:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                                        <TextField fx:id="txtDestinoPaquete" promptText="Ciudad / dirección destino"
+                                                   GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                                        <Label text="Peso (kg):" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                                        <TextField fx:id="txtPesoPaquete" promptText="Ej: 2.3"
+                                                   GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                                        <Label text="Volumen (cm³):" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                                        <TextField fx:id="txtVolumenPaquete" promptText="Ej: 3500"
+                                                   GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                                        <Label text="Prioridad:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                                        <ComboBox fx:id="cmbPrioridadPaquete"
+                                                  GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                                    </children>
+                                </GridPane>
+
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <children>
+                                        <Button text="Cotizar Paquete Libre"
+                                                onAction="#onCotizarPaqueteLibre"
+                                                style="-fx-background-color: #8e44ad; -fx-text-fill: white;"/>
+                                        <Button text="Agregar Paquete al Carrito"
+                                                onAction="#onAgregarPaqueteAlCarrito"
+                                                style="-fx-background-color: #16a085; -fx-text-fill: white;"/>
+                                        <Label fx:id="lblResumenPaquete" text="Tarifa estimada: —"/>
+                                    </children>
+                                </HBox>
                             </children>
                         </VBox>
                     </content>

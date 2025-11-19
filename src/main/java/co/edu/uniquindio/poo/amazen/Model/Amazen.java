@@ -12,6 +12,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Fachada principal del dominio Amazen.
+ * Administra inventario, historial de pedidos, sesión y personas registradas.
+ */
 @Getter
 @Setter
 public class Amazen {
@@ -34,6 +38,9 @@ public class Amazen {
         guardarDatosInicialesEnArchivos();
     }
 
+    /**
+     * Obtiene la instancia única de Amazen.
+     */
     public static Amazen getInstance() {
         if (instancia == null) {
             instancia = new Amazen();
@@ -41,6 +48,12 @@ public class Amazen {
         return instancia;
     }
 
+    /**
+     * Busca una persona por su documento.
+     *
+     * @param documento documento de la persona
+     * @return persona encontrada o {@code null} si no existe
+     */
     public Persona buscarPersonaPorDocumento(String documento) {
         return listaPersonas.stream()
                 .filter(p -> p.getDocumento().equalsIgnoreCase(documento))
@@ -48,6 +61,11 @@ public class Amazen {
                 .orElse(null);
     }
 
+    /**
+     * Agrega una persona al sistema y la persiste en su archivo correspondiente.
+     *
+     * @param persona persona a registrar
+     */
     public void agregarPersona(Persona persona) {
         listaPersonas.add(persona);
         guardarPersonaEnArchivo(persona);
@@ -63,6 +81,9 @@ public class Amazen {
         }
     }
 
+    /**
+     * Carga administradores, repartidores y usuarios desde archivos.
+     */
     private void cargarPersonasDesdeArchivos() {
         List<Usuario> usuariosArchivo = UsuarioFileService.cargarUsuarios();
         List<Administrador> adminsArchivo = AdminFileService.cargarAdministradores();
@@ -76,6 +97,9 @@ public class Amazen {
                 (adminsArchivo.size() + repartidoresArchivo.size() + usuariosArchivo.size()) + " personas)");
     }
 
+    /**
+     * Crea datos iniciales de ejemplo si no existen en memoria.
+     */
     private void cargarDatosIniciales() {
 
         if (buscarPersonaPorDocumento("111") == null) {
@@ -175,6 +199,9 @@ public class Amazen {
         System.out.println("🔥 Datos quemados cargados en memoria (" + listaPersonas.size() + " personas)");
     }
 
+    /**
+     * Persiste todas las personas cargadas/inicializadas en sus archivos.
+     */
     private void guardarDatosInicialesEnArchivos() {
         for (Persona persona : listaPersonas) {
             guardarPersonaEnArchivo(persona);
@@ -182,16 +209,30 @@ public class Amazen {
         System.out.println("💾 Datos guardados en archivos correctamente.");
     }
 
+    /**
+     * Devuelve la lista de pedidos en modo solo lectura.
+     */
     public List<Pedido> getListaPedidos() {
         List<Pedido> base = historialPedido.getPedidos();
         return base == null ? List.of() : Collections.unmodifiableList(base);
     }
 
+    /**
+     * Agrega un pedido al historial.
+     *
+     * @param pedido pedido a registrar
+     */
     public void addPedido(Pedido pedido) {
         if (pedido == null) throw new IllegalArgumentException("Pedido requerido");
         historialPedido.agregarPedido(pedido);
     }
 
+    /**
+     * Elimina un pedido por su identificador.
+     *
+     * @param id id del pedido
+     * @return {@code true} si se eliminó, {@code false} en caso contrario
+     */
     public boolean removePedidoById(String id) {
         if (id == null) return false;
         return historialPedido.eliminarPedidoPorId(id);
